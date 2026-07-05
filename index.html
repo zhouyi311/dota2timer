@@ -3,87 +3,135 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dota2 Timer</title>
+    <title>Dota 2 Event Timer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Google+Sans+Code:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="container">
-        <h1>Dota2 Timer</h1>
 
-        
-
-        <div class="section">
-            <h3>Lead Time (in seconds)</h3>
-            <div class="input-group">
-                <label for="leadTime1">1-min interval</label>
-                <input type="number" id="leadTime1" min="0" value="15">
-            </div>
-            <div class="input-group">
-                <label for="leadTime2">2-min interval</label>
-                <input type="number" id="leadTime2" min="0" value="15">
-            </div>
-            <div class="input-group">
-                <label for="leadTime3">3-min interval</label>
-                <input type="number" id="leadTime3" min="0" value="15">
-            </div>
-            <div class="input-group">
-                <label for="leadTime7">7-min interval</label>
-                <input type="number" id="leadTime7" min="0" value="25">
-            </div>
+    <header class="site-header">
+        <div class="header-content">
+            <a href="#" class="brand">ez2.run</a>
+            <span class="divider">/</span>
+            <span class="page-title">Dota2 Timer</span>
         </div>
+    </header>
 
-        <div class="section">
-            <h3>Voiceover</h3>
-            <div class="input-group">
-                <label for="toggleJungle">1-min: "Jungle"</label>
-                <input type="checkbox" id="toggleJungle" checked>
+    <div class="page-content">
+        <div class="container">
+            <h1>Dota 2 Event Timer</h1>
+            <div class="phase-toggle">
+                <button id="preGameBtn" class="phase-btn">Pre-Game</button>
+                <button id="mainGameBtn" class="phase-btn active">Main Game</button>
             </div>
-            <div class="input-group">
-                <label for="toggleRaverRune">2-min: "Raver Rune"</label>
-                <input type="checkbox" id="toggleRaverRune" checked>
-            </div>
-            <div class="input-group">
-                <label for="toggleLotus">3-min: "Lotus"</label>
-                <input type="checkbox" id="toggleLotus" checked>
-            </div>
-            <div class="input-group">
-                <label for="toggleExpRune">7-min: "Exp Rune"</label>
-                <input type="checkbox" id="toggleExpRune" checked>
-            </div>
-        </div>
-        
-        <div class="section">
-            <h3>Volume</h3>
-            <div class="input-group" id="volume-control">
-                <label><input type="radio" name="volume" value="0.2"> 20%</label>
-                <label><input type="radio" name="volume" value="0.4"> 40%</label>
-                <label><input type="radio" name="volume" value="0.6" checked> 60%</label>
-                <label><input type="radio" name="volume" value="0.8"> 80%</label>
-                <label><input type="radio" name="volume" value="1.0"> 100%</label>
-            </div>
-        </div>
 
-        <div class="section">
-            <h3>Game Time Calibration</h3>
-            <div class="input-group">
-                <label for="minutes">Minutes:</label>
-                <input type="number" id="minutes" min="0" value="0">
-                <label for="seconds" class="seconds-label">Seconds:</label>
-                <input type="number" id="seconds" min="0" max="59" value="0">
-            </div>
-            <button id="setTime">Update Current Time</button>
-        </div>
+            <main class="timer-core">
+                <div id="time-display-wrapper">
+                    <div class="time-preset-controls">
+                        <button id="setTimeZero" class="time-adjust-btn">0:00</button>
+                        <button id="setTimeNinety" class="time-adjust-btn">1:30</button>
+                    </div>
+                    <div id="editable-time-wrapper">
+                        <input type="tel" id="currentMinutes" class="time-input" min="0" max="999" maxlength="3" value="00">
+                        <span class="time-separator">:</span>
+                        <input type="tel" id="currentSeconds" class="time-input" min="0" max="59" maxlength="2" value="00">
+                    </div>
+                    <div class="time-adjust-controls">
+                        <button id="adjustTimePlus" class="time-adjust-btn">+1s</button>
+                        <button id="adjustTimeMinus" class="time-adjust-btn">-1s</button>
+                    </div>
+                </div>
+                <p class="edit-hint">Click on the time to edit.</p>
+                <div class="timer-controls">
+                    <button id="pauseBtn" class="pill-btn">Pause</button>
+                    <button id="startBtn" class="pill-btn">Start</button>
+                </div>
+            </main>
 
-        <div class="section">
-            <h3>Current Game Time</h3>
-            <div id="time-display-wrapper">
-                <button id="adjustTimeMinus" class="time-adjust-btn">-1s</button>
-                <p id="currentTime">00:00</p>
-                <button id="adjustTimePlus" class="time-adjust-btn">+1s</button>
+            <!-- New Unified Settings Card -->
+            <div class="settings-card full-width">
+                <h2>Settings</h2>
+                
+                <div class="setting-group">
+                    <div class="setting-item volume-row">
+                        <label for="volumeSlider" class="setting-label">Alert Volume</label>
+                        <div class="input-group" id="volume-control">
+                            <span id="volumeValue">0.6</span>
+                            <input type="range" id="volumeSlider" min="0" max="1" step="0.05" value="0.6">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="setting-group">
+                    <div class="setting-item">
+                        <span class="setting-label">Alert Options</span>
+                    </div>
+                    <div class="announcement-settings-grid">
+                        <div class="grid-header">
+                            <span class="grid-col-event">Periodic Spawns (Interval)</span>
+                            <span class="grid-col-leadtime">Lead Time</span>
+                            <span class="grid-col-voiceover">Voiceover</span>
+                        </div>
+                        <!-- Jungle -->
+                        <div class="grid-row">
+                            <span class="grid-col-event">🐅 Jungle Stacks (1m)</span>
+                            <div class="grid-col-leadtime setting-input-wrapper">
+                                <span>-</span>
+                                <input type="number" id="leadTime1" min="0" value="15">
+                                <span>s</span>
+                            </div>
+                            <div class="grid-col-voiceover">
+                                <input type="checkbox" id="toggleJungle" checked>
+                            </div>
+                        </div>
+                        <!-- River Rune -->
+                        <div class="grid-row">
+                            <span class="grid-col-event">💪 Power Runes (2m)</span>
+                            <div class="grid-col-leadtime setting-input-wrapper">
+                                <span>-</span>
+                                <input type="number" id="leadTime2" min="0" value="15">
+                                <span>s</span>
+                            </div>
+                            <div class="grid-col-voiceover">
+                                <input type="checkbox" id="toggleRaverRune" checked>
+                            </div>
+                        </div>
+                        <!-- Lotus -->
+                        <div class="grid-row">
+                            <span class="grid-col-event">🪷 Lotus Blooms (3m)</span>
+                            <div class="grid-col-leadtime setting-input-wrapper">
+                                <span>-</span>
+                                <input type="number" id="leadTime3" min="0" value="15">
+                                <span>s</span>
+                            </div>
+                            <div class="grid-col-voiceover">
+                                <input type="checkbox" id="toggleLotus" checked>
+                            </div>
+                        </div>
+                        <!-- XP Rune -->
+                        <div class="grid-row">
+                            <span class="grid-col-event">⛩ Wisdom Shine (7m)</span>
+                            <div class="grid-col-leadtime setting-input-wrapper">
+                                <span>-</span>
+                                <input type="number" id="leadTime7" min="0" value="25">
+                                <span>s</span>
+                            </div>
+                            <div class="grid-col-voiceover">
+                                <input type="checkbox" id="toggleExpRune" checked>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="settings-note">Alerts will only occur once per min, the alert lead time for overlapping events is determined by bottom to top priority (Wisdom > Lotus > Power > Stacks).</p>
+                </div>
             </div>
-            <button id="startPause">Start</button>
         </div>
     </div>
+
+    <footer class="site-footer">
+        <p>&copy; 2024 ez2.run. All rights reserved. Not affiliated with Valve Corp.</p>
+    </footer>
 
     <script src="main.js"></script>
 </body>

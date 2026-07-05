@@ -1,7 +1,7 @@
 let timerId = null;
 let totalSeconds = 0;
 let isRunning = false;
-let hasBeenStarted = false; // True if the timer has ever been started from a set time
+let gamePhase = 'pre-game'; // 'pre-game' or 'main-game'
 let leadTimes = {};
 let voiceoverSettings = {};
 
@@ -56,9 +56,20 @@ function checkAndAnnounce() {
  * The main timer loop, executed every second.
  */
 function tick() {
-    totalSeconds++;
+    if (gamePhase === 'pre-game') {
+        totalSeconds++; // Will count up from negative
+        if (totalSeconds === 0) {
+            // Transition from pre-game to main-game
+            gamePhase = 'main-game';
+            self.postMessage({ type: 'phase_change', newPhase: 'main-game' });
+            self.postMessage({ type: 'audio', sounds: ['ding1'] });
+        }
+    } else { // 'main-game'
+        totalSeconds++;
+        checkAndAnnounce();
+    }
+    
     self.postMessage({ type: 'time', totalSeconds, workerIsRunning: isRunning });
-    checkAndAnnounce();
 }
 
 // --- Worker Event Listener ---
@@ -68,14 +79,8 @@ self.onmessage = function(e) {
 
     switch (command) {
         case 'start_or_resume':
-            leadTimes = data.leadTimes;
-            voiceoverSettings = data.voiceoverSettings;
-
-            if (!hasBeenStarted) {
-                // This is a fresh start from calibration time
-                totalSeconds = data.timeOffset || 0;
-                hasBeenStarted = true;
-            }
+            if (data.leadTimes) leadTimes = data.leadTimes;
+            if (data.voiceoverSettings) voiceoverSettings = data.voiceoverSettings;
 
             if (!isRunning) {
                 isRunning = true;
@@ -95,23 +100,24 @@ self.onmessage = function(e) {
             break;
 
         case 'set_time':
-            // If timer is running, just update the time and continue.
-            if (isRunning) {
-                totalSeconds = data.timeOffset;
-            } else {
-                // If timer is stopped, reset everything.
-                totalSeconds = data.timeOffset;
-                hasBeenStarted = false; // A new time set means the next start is a fresh one
-                if (timerId) clearInterval(timerId);
-                timerId = null;
+            totalSeconds = data.timeOffset;
+            if (!isRunning) {
                 self.postMessage({ type: 'time', totalSeconds, workerIsRunning: isRunning });
             }
             break;
 
+        case 'set_phase':
+            gamePhase = data.phase;
+            // When phase is set manually, time is already set by main thread.
+            // We just need to acknowledge the phase.
+            break;
+
         case 'adjust_time':
             totalSeconds += data.seconds;
-            if (totalSeconds < 0) totalSeconds = 0;
-            // Post back the new time immediately for UI update
+             // Prevent main game time from going below 0, but allow pre-game time to be negative
+            if (gamePhase === 'main-game' && totalSeconds < 0) {
+                totalSeconds = 0;
+            }
             self.postMessage({ type: 'time', totalSeconds, workerIsRunning: isRunning });
             break;
     }

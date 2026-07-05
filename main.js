@@ -1,21 +1,27 @@
 document.addEventListener('DOMContentLoaded', () => {
     // DOM Elements
-    const minutesInput = document.getElementById('minutes');
-    const secondsInput = document.getElementById('seconds');
-    const setTimeBtn = document.getElementById('setTime');
+    const preGameBtn = document.getElementById('preGameBtn');
+    const mainGameBtn = document.getElementById('mainGameBtn');
+    const currentMinutesInput = document.getElementById('currentMinutes');
+    const currentSecondsInput = document.getElementById('currentSeconds');
+    const startBtn = document.getElementById('startBtn');
+    const pauseBtn = document.getElementById('pauseBtn');
+
     const leadTime1Input = document.getElementById('leadTime1');
     const leadTime2Input = document.getElementById('leadTime2');
     const leadTime3Input = document.getElementById('leadTime3');
     const leadTime7Input = document.getElementById('leadTime7');
-    const startPauseBtn = document.getElementById('startPause');
-    const currentTimeDisplay = document.getElementById('currentTime');
+    
     const toggleJungle = document.getElementById('toggleJungle');
     const toggleRaverRune = document.getElementById('toggleRaverRune');
     const toggleLotus = document.getElementById('toggleLotus');
     const toggleExpRune = document.getElementById('toggleExpRune');
+    
     const adjustTimePlusBtn = document.getElementById('adjustTimePlus');
     const adjustTimeMinusBtn = document.getElementById('adjustTimeMinus');
-    const volumeControls = document.querySelectorAll('input[name="volume"]');
+    const volumeSlider = document.getElementById('volumeSlider');
+    const volumeValue = document.getElementById('volumeValue');
+    const timeInputs = [currentMinutesInput, currentSecondsInput];
 
     // Audio Elements
     const audioObjects = {
@@ -31,263 +37,252 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let worker;
     let isRunning = false;
+    let currentPhase = 'pre-game';
     let audioUnlocked = false;
     let audioQueue = [];
     let isPlayingAudio = false;
 
-    // --- Audio Queue Functions ---
-
+    // --- Audio Queue ---
     const playNextInQueue = () => {
-        if (audioQueue.length === 0) {
-            isPlayingAudio = false;
-            return;
-        }
-
+        if (audioQueue.length === 0) { isPlayingAudio = false; return; }
         isPlayingAudio = true;
         const soundName = audioQueue.shift();
         const audio = audioObjects[soundName];
-
-        if (!audio) {
-            console.warn(`Sound not found: ${soundName}`);
-            playNextInQueue(); // Play next one
-            return;
-        }
-
-        audio.onended = () => {
-            playNextInQueue();
-        };
-        audio.onerror = (e) => {
-            console.error(`Error playing ${soundName}`, e);
-            playNextInQueue(); // Skip to next
-        };
-        audio.play().catch(e => {
-            console.error(`Playback of ${soundName} was prevented.`, e);
-            playNextInQueue();
-        });
+        if (!audio) { playNextInQueue(); return; }
+        audio.onended = () => playNextInQueue();
+        audio.onerror = (e) => { console.error(`Error playing ${soundName}`, e); playNextInQueue(); };
+        audio.play().catch(e => { console.error(`Playback of ${soundName} was prevented.`, e); playNextInQueue(); });
     };
-
     const addToQueue = (soundName) => {
         audioQueue.push(soundName);
-        if (!isPlayingAudio) {
-            playNextInQueue();
-        }
+        if (!isPlayingAudio) playNextInQueue();
     };
 
-
-    // --- Utility Functions ---
-
-    const formatTime = (totalSeconds) => {
-        if (typeof totalSeconds !== 'number' || isNaN(totalSeconds)) {
-            return "Error";
-        }
-        const minutes = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
-        const seconds = (totalSeconds % 60).toString().padStart(2, '0');
-        return `${minutes}:${seconds}`;
-    };
-
+    // --- Getters & Setters ---
     const getLeadTimes = () => ({
-        1: parseInt(leadTime1Input.value, 10),
-        2: parseInt(leadTime2Input.value, 10),
-        3: parseInt(leadTime3Input.value, 10),
-        7: parseInt(leadTime7Input.value, 10),
+        1: parseInt(leadTime1Input.value, 10), 2: parseInt(leadTime2Input.value, 10),
+        3: parseInt(leadTime3Input.value, 10), 7: parseInt(leadTime7Input.value, 10),
     });
-
     const getVoiceoverSettings = () => ({
-        jungle: toggleJungle.checked,
-        raver_rune: toggleRaverRune.checked,
-        lotus: toggleLotus.checked,
-        exp_rune: toggleExpRune.checked,
+        jungle: toggleJungle.checked, raver_rune: toggleRaverRune.checked,
+        lotus: toggleLotus.checked, exp_rune: toggleExpRune.checked,
     });
 
-    const saveLeadTimes = () => {
-        const leadTimes = getLeadTimes();
-        localStorage.setItem('leadTimes', JSON.stringify(leadTimes));
-    };
-
-    const saveVoiceoverSettings = () => {
-        const voiceoverSettings = getVoiceoverSettings();
-        localStorage.setItem('voiceoverSettings', JSON.stringify(voiceoverSettings));
-    };
-
+    // --- Local Storage ---
+    const saveLeadTimes = () => localStorage.setItem('leadTimes', JSON.stringify(getLeadTimes()));
+    const saveVoiceoverSettings = () => localStorage.setItem('voiceoverSettings', JSON.stringify(getVoiceoverSettings()));
     const saveVolume = () => {
-        const volume = document.querySelector('input[name="volume"]:checked').value;
+        const volume = volumeSlider.value;
         localStorage.setItem('dotaTimerVolume', volume);
         setVolume(volume);
     };
-
-    const loadLeadTimes = () => {
-        const saved = localStorage.getItem('leadTimes');
-        if (saved) {
-            const leadTimes = JSON.parse(saved);
-            leadTime1Input.value = leadTimes[1] || 10;
-            leadTime2Input.value = leadTimes[2] || 10;
-            leadTime3Input.value = leadTimes[3] || 10;
-            leadTime7Input.value = leadTimes[7] || 15;
+    const loadSettings = () => {
+        const savedLeadTimes = localStorage.getItem('leadTimes');
+        if (savedLeadTimes) {
+            const leadTimes = JSON.parse(savedLeadTimes);
+            leadTime1Input.value = leadTimes[1] || 10; leadTime2Input.value = leadTimes[2] || 10;
+            leadTime3Input.value = leadTimes[3] || 10; leadTime7Input.value = leadTimes[7] || 15;
         }
-    };
-
-    const loadVoiceoverSettings = () => {
-        const saved = localStorage.getItem('voiceoverSettings');
-        if (saved) {
-            const voiceoverSettings = JSON.parse(saved);
-            toggleJungle.checked = voiceoverSettings.jungle !== false; // default to true
-            toggleRaverRune.checked = voiceoverSettings.raver_rune !== false;
-            toggleLotus.checked = voiceoverSettings.lotus !== false;
-            toggleExpRune.checked = voiceoverSettings.exp_rune !== false;
+        const savedVoiceovers = localStorage.getItem('voiceoverSettings');
+        if (savedVoiceovers) {
+            const vs = JSON.parse(savedVoiceovers);
+            toggleJungle.checked = vs.jungle !== false; toggleRaverRune.checked = vs.raver_rune !== false;
+            toggleLotus.checked = vs.lotus !== false; toggleExpRune.checked = vs.exp_rune !== false;
         }
+        const savedVolume = localStorage.getItem('dotaTimerVolume') || "0.6";
+        volumeSlider.value = savedVolume;
+        volumeValue.textContent = savedVolume;
+        setVolume(savedVolume);
     };
 
-    const loadVolume = () => {
-        const savedVolume = localStorage.getItem('dotaTimerVolume');
-        if (savedVolume) {
-            const volumeRadio = document.querySelector(`input[name="volume"][value="${savedVolume}"]`);
-            if (volumeRadio) {
-                volumeRadio.checked = true;
-            }
-            setVolume(savedVolume);
-        } else {
-            // Default to 60% if nothing is saved
-            const defaultVolume = 0.6;
-            document.querySelector(`input[name="volume"][value="${defaultVolume}"]`).checked = true;
-            setVolume(defaultVolume);
-        }
-    };
-
-    const unlockAudio = () => {
-        if (audioUnlocked) return;
-        audioUnlocked = true;
-
-        // Play a silent sound to unlock audio
-        const silentSound = new Audio("data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=");
-        silentSound.play().catch(e => console.warn("Audio unlock failed.", e));
-    };
-
-    const setVolume = (volume) => {
-        Object.values(audioObjects).forEach(audio => audio.volume = volume);
-    }
-
+    const setVolume = (volume) => Object.values(audioObjects).forEach(audio => audio.volume = volume);
 
     // --- Worker Communication ---
-
     const initializeWorker = () => {
+        if (worker) return;
         try {
-            console.log("Initializing worker...");
             worker = new Worker('worker.js');
-
             worker.onmessage = (e) => {
-                console.log("Message received from worker:", e.data);
-                const { type, sounds, totalSeconds, workerIsRunning } = e.data;
-
-                if (type === 'audio' && sounds) {
-                    sounds.forEach(sound => addToQueue(sound));
-                } else if (type === 'time') {
-                    currentTimeDisplay.textContent = formatTime(totalSeconds);
-                    // Update running state and color based on worker's status
-                    isRunning = workerIsRunning;
-                    if (isRunning) {
-                        currentTimeDisplay.classList.remove('paused');
-                        currentTimeDisplay.classList.add('running');
-                    } else {
-                        currentTimeDisplay.classList.remove('running');
-                        currentTimeDisplay.classList.add('paused');
-                    }
-                }
+                const { type, sounds, totalSeconds, newPhase } = e.data;
+                if (type === 'audio' && sounds) sounds.forEach(addToQueue);
+                else if (type === 'time') updateDisplayTime(totalSeconds);
+                else if (type === 'phase_change' && newPhase) switchPhase(newPhase, false); // Crucially, false here
             };
-
-            worker.onerror = (err) => {
-                console.error('Worker error:', err);
-                currentTimeDisplay.textContent = "Error";
-                // Invalidate the worker
-                worker = null;
-                isRunning = false;
-                startPauseBtn.textContent = 'Start';
-                startPauseBtn.classList.remove('paused');
-                currentTimeDisplay.classList.remove('running', 'paused');
-
-            };
+            worker.onerror = (err) => { console.error('Worker error:', err); worker = null; updateUIState(false); };
         } catch (e) {
             console.error('Failed to initialize worker:', e);
-            currentTimeDisplay.textContent = "Error";
+            alert("Failed to start timer. Web Workers may be blocked by your browser.");
+        }
+    };
+
+    const updateDisplayTime = (totalSeconds) => {
+        const displaySeconds = Math.abs(totalSeconds);
+        const minutes = Math.floor(displaySeconds / 60);
+        const seconds = displaySeconds % 60;
+        if (document.activeElement !== currentMinutesInput && document.activeElement !== currentSecondsInput) {
+            currentMinutesInput.value = String(minutes).padStart(2, '0');
+            currentSecondsInput.value = String(seconds).padStart(2, '0');
+        }
+    };
+
+    const updateUIState = (running, isEditing = false) => {
+        isRunning = running;
+        startBtn.disabled = isRunning;
+        pauseBtn.disabled = !isRunning;
+        
+        timeInputs.forEach(input => {
+            input.classList.remove('running', 'paused', 'pre-game-color', 'pre-game-edit');
+            if (isEditing && currentPhase === 'pre-game') {
+                input.classList.add('pre-game-edit');
+                return;
+            }
+
+            if (currentPhase === 'pre-game') {
+                input.classList.add(isRunning ? 'pre-game-color' : 'paused');
+            } else { // main-game
+                input.classList.add(isRunning ? 'running' : 'paused');
+            }
+        });
+    };
+
+    const switchPhase = (newPhase, notifyWorker = true) => {
+        currentPhase = newPhase;
+        
+        // BUG FIX: Only pause if the switch is manual (i.e., user-initiated)
+        if (isRunning && notifyWorker) {
+            handlePause();
+        }
+        
+        if (currentPhase === 'pre-game') {
+            preGameBtn.classList.add('active');
+            mainGameBtn.classList.remove('active');
+            
+            let minutes = parseInt(currentMinutesInput.value, 10) || 0;
+            let seconds = parseInt(currentSecondsInput.value, 10) || 0;
+            const totalSec = minutes * 60 + seconds;
+
+            if (totalSec > 90 || totalSec <= 0) {
+                currentMinutesInput.value = "01";
+                currentSecondsInput.value = "30";
+            }
+        } else { // 'main-game'
+            mainGameBtn.classList.add('active');
+            preGameBtn.classList.remove('active');
+            currentMinutesInput.value = "00";
+            currentSecondsInput.value = "00";
+        }
+        
+        updateTimeFromInputs();
+        // Don't update UI state if the timer is running, as it will handle its own color
+        if (!isRunning) {
+            updateUIState(false);
+        }
+
+        if (worker && notifyWorker) {
+            worker.postMessage({ command: 'set_phase', data: { phase: currentPhase } });
         }
     };
 
     // --- Event Handlers ---
-
-    startPauseBtn.addEventListener('click', () => {
-        if (!worker) {
-            initializeWorker();
-            // If worker failed to initialize, worker will be null
-            if (!worker) {
-                alert("Failed to start timer. Web Workers may be blocked by your browser, especially when running from local file://. Please use a local web server.");
-                return;
-            }
+    const handleStart = () => {
+        if (!audioUnlocked) {
+            const silentSound = new Audio("data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=");
+            silentSound.play().catch(e => console.warn("Audio unlock failed.", e));
+            audioUnlocked = true;
         }
         
-        unlockAudio();
-
-        if (!isRunning) {
-            // If timer is stopped, we need to start or resume it.
-            // The worker will know if it's a fresh start or a resume.
-            const timeOffset = (parseInt(minutesInput.value, 10) || 0) * 60 + (parseInt(secondsInput.value, 10) || 0);
-            worker.postMessage({
-                command: 'start_or_resume',
-                data: {
-                    timeOffset,
-                    leadTimes: getLeadTimes(),
-                    voiceoverSettings: getVoiceoverSettings()
-                }
-            });
-            startPauseBtn.textContent = 'Pause';
-        } else {
-            // If timer is running, we pause it.
-            worker.postMessage({ command: 'pause' });
-            startPauseBtn.textContent = 'Start';
-        }
-    });
-
-    setTimeBtn.addEventListener('click', () => {
-        const timeOffset = (parseInt(minutesInput.value, 10) || 0) * 60 + (parseInt(secondsInput.value, 10) || 0);
-        // If timer is not running, update UI immediately.
-        if (!isRunning) {
-            currentTimeDisplay.textContent = formatTime(timeOffset);
-            currentTimeDisplay.classList.remove('running', 'paused');
-            startPauseBtn.textContent = 'Start'; // Reset button text
-        }
-        worker?.postMessage({ command: 'set_time', data: { timeOffset } });
-    });
-
-    [leadTime1Input, leadTime2Input, leadTime3Input, leadTime7Input].forEach(input => {
-        input.addEventListener('change', saveLeadTimes);
-    });
-
-    [toggleJungle, toggleRaverRune, toggleLotus, toggleExpRune].forEach(toggle => {
-        toggle.addEventListener('change', saveVoiceoverSettings);
-    });
-
-    volumeControls.forEach(radio => {
-        radio.addEventListener('change', saveVolume);
-    });
-
-    const adjustTime = (seconds) => {
-        // Directly send adjustment command to the worker if it exists.
-        // If worker doesn't exist, initialize it first.
-        if (!worker) initializeWorker();
-        if (!worker) return; // Guard against initialization failure
-
-        // This works whether the timer is running or paused.
-        unlockAudio(); // Ensure audio context is ready if user interacts first here
+        updateTimeFromInputs(); // Sync time before starting
         worker.postMessage({
-            command: 'adjust_time',
-            data: { seconds }
+            command: 'start_or_resume',
+            data: { leadTimes: getLeadTimes(), voiceoverSettings: getVoiceoverSettings() }
         });
+        updateUIState(true);
     };
 
-    adjustTimePlusBtn.addEventListener('click', () => adjustTime(1));
-    adjustTimeMinusBtn.addEventListener('click', () => adjustTime(-1));
+    const handlePause = () => {
+        if (!worker) return;
+        worker.postMessage({ command: 'pause' });
+        updateUIState(false);
+    };
+    
+    const updateTimeFromInputs = () => {
+        // More robust validation: treat any non-number as 0.
+        let minutes = parseInt(currentMinutesInput.value, 10) || 0;
+        let seconds = parseInt(currentSecondsInput.value, 10) || 0;
+        
+        currentMinutesInput.value = String(minutes).padStart(2, '0');
+        currentSecondsInput.value = String(seconds).padStart(2, '0');
+        
+        let timeOffset = minutes * 60 + seconds;
+        if (currentPhase === 'pre-game') timeOffset = -timeOffset;
+        
+        if (worker) {
+            worker.postMessage({ command: 'set_time', data: { timeOffset } });
+        } else {
+            updateDisplayTime(timeOffset);
+        }
+        if (!isRunning) {
+            updateUIState(false);
+        }
+    };
 
     // --- Initialization ---
+    const init = () => {
+        loadSettings();
+        initializeWorker();
+        
+        startBtn.addEventListener('click', handleStart);
+        pauseBtn.addEventListener('click', handlePause);
+        preGameBtn.addEventListener('click', () => switchPhase('pre-game'));
+        mainGameBtn.addEventListener('click', () => switchPhase('main-game'));
 
-    loadLeadTimes();
-    loadVoiceoverSettings();
-    loadVolume();
+        timeInputs.forEach(input => {
+            input.addEventListener('focus', () => { 
+                if (isRunning) handlePause();
+                updateUIState(false, true); // Enter editing mode
+            });
+            input.addEventListener('blur', updateTimeFromInputs);
+        });
+
+        [leadTime1Input, leadTime2Input, leadTime3Input, leadTime7Input].forEach(i => i.addEventListener('change', saveLeadTimes));
+        [toggleJungle, toggleRaverRune, toggleLotus, toggleExpRune].forEach(t => t.addEventListener('change', saveVoiceoverSettings));
+        
+        volumeSlider.addEventListener('input', (e) => {
+            const newVolume = e.target.value;
+            volumeValue.textContent = newVolume;
+            setVolume(newVolume);
+        });
+        volumeSlider.addEventListener('change', saveVolume); // Save only when user releases slider
+
+        adjustTimePlusBtn.addEventListener('click', () => worker.postMessage({ command: 'adjust_time', data: { seconds: 1 } }));
+        adjustTimeMinusBtn.addEventListener('click', () => worker.postMessage({ command: 'adjust_time', data: { seconds: -1 } }));
+
+        const setTimeZero = document.getElementById('setTimeZero');
+        const setTimeNinety = document.getElementById('setTimeNinety');
+
+        setTimeZero.addEventListener('click', () => {
+            currentMinutesInput.value = "00";
+            currentSecondsInput.value = "00";
+            updateTimeFromInputs();
+        });
+
+        setTimeNinety.addEventListener('click', () => {
+            currentMinutesInput.value = "01";
+            currentSecondsInput.value = "30";
+            updateTimeFromInputs();
+        });
+
+        // Default to main game as requested
+        switchPhase('main-game', false);
+        
+        if (worker) {
+            // Wait a moment for worker to be ready before setting phase
+            setTimeout(() => {
+                worker.postMessage({ command: 'set_phase', data: { phase: 'main-game' } });
+                updateTimeFromInputs(); // Ensure time is set to 0
+            }, 100);
+        }
+    };
+
+    init();
 });
