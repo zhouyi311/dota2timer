@@ -62,7 +62,7 @@ body {
     display: flex;
     justify-content: center;
     align-items: flex-start;
-    padding: var(--space-4);
+    padding: 0 var(--space-4);
     width: 100%;
 }
 
@@ -74,7 +74,7 @@ New Global Header & Footer
 .brand { color: var(--color-header-brand); text-decoration: none; transition: var(--transition-base); }
 .brand:hover { color: var(--color-secondary); }
 .divider, .page-title { color: var(--color-header-text); }
-.site-footer { padding: var(--space-4); text-align: center; color: var(--color-header-text); font-size: var(--font-size-sm); margin-top: auto; }
+.site-footer { padding: 0; text-align: center; color: var(--color-header-text); font-size: var(--font-size-sm); margin-top: auto; }
 
 /* ---
 Main Container (Card)
@@ -100,16 +100,19 @@ Main Container (Card)
 /* ---
 Phase Toggle
 --- */
-.phase-toggle { display: flex; justify-content: center; background-color: rgba(0, 0, 0, 0.2); border-radius: var(--border-radius-pill); width: max-content; margin-inline: auto; overflow: hidden; }
+.phase-toggle { display: flex; justify-content: center; background-color: rgba(0, 0, 0, 0.2); border-radius: 8px; width: max-content; margin-inline: auto; overflow: hidden; }
 .phase-btn { padding: var(--space-1) var(--space-3); cursor: pointer; font-size: var(--font-size-sm); font-weight: 600; border: none; background-color: transparent; color: var(--color-text-muted); transition: var(--transition-base); border-radius: 0; }
 .phase-btn.active { background-color: var(--toggle-active-bg); color: var(--color-text-base); }
 
 /* ---
 Timer Core
 --- */
-.timer-core { display: flex; flex-direction: column; align-items: center; gap: var(--space-3); }
+.timer-core { display: flex; flex-direction: column; align-items: center; gap: var(--space-2); } /* Reduced gap for tighter look */
 #time-display-wrapper { width: 100%; display: flex; align-items: center; justify-content: center; gap: var(--space-4); }
-#editable-time-wrapper { display: flex; align-items: center; }
+#editable-time-wrapper { display: flex; flex-direction: column; align-items: center; gap: 0; }
+
+/* This new class is for the horizontal grouping of time inputs */
+.time-inputs-container { display: flex; align-items: center; }
 
 .time-input { font-family: var(--font-family-mono); font-size: var(--font-size-4xl); font-weight: 700; color: var(--color-text-base); background-color: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; width: 4ch; text-align: center; padding: var(--space-1) 0; -moz-appearance: textfield; transition: var(--transition-base); }
 .time-input:hover { background-color: rgba(0,0,0,0.3); border-color: rgba(255,255,255,0.2); }
@@ -121,9 +124,10 @@ Timer Core
 .time-input.running { color: var(--color-primary); }
 .time-input.paused { color: var(--color-text-muted); }
 .time-input.pre-game-color { color: var(--color-danger); }
+.time-input.pre-game-paused { color: #fca5a5; } /* New class for paused pre-game */
 .time-input.pre-game-edit { color: #fca5a5; }
 
-.edit-hint { color: var(--color-text-muted-translucent); font-size: var(--font-size-xs); margin-top: calc(-1 * var(--space-2)); text-transform: uppercase; letter-spacing: 0.5px; }
+.edit-hint { color: var(--color-text-muted-translucent); font-size: var(--font-size-xs); margin-top: calc(-1 * var(--space-1)); text-transform: uppercase; letter-spacing: 0.5px; text-align: center;}
 
 /* ---
 Buttons
@@ -239,7 +243,7 @@ input[type="checkbox"]:checked { accent-color: var(--color-primary); }
 Responsive
 --- */
 @media (max-width: 600px) {
-    .page-content { padding: var(--space-2); }
+    .page-content { padding: 0; }
     .container { margin-top: 0; padding: var(--space-3); border-radius: 0; }
     #time-display-wrapper { gap: var(--space-2); } /* Reduce gap on mobile */
     .time-input { font-size: 2.5rem; } /* Shrink time font on mobile */

@@ -29,10 +29,10 @@ document.addEventListener('DOMContentLoaded', () => {
         ding2: new Audio('audio/ding2.mp3'),
         ding3: new Audio('audio/ding3.mp3'),
         special: new Audio('audio/special.mp3'),
-        jungle: new Audio('audio/1 jungle.mp3'),
-        raver_rune: new Audio('audio/2 raver rune.mp3'),
-        lotus: new Audio('audio/3 lotus.mp3'),
-        exp_rune: new Audio('audio/7 exp rune.mp3'),
+        jungle: new Audio('audio/1-jungle.mp3'),
+        raver_rune: new Audio('audio/2-power-rune.mp3'),
+        lotus: new Audio('audio/3-lotus.mp3'),
+        exp_rune: new Audio('audio/7-wisdom-rune.mp3'),
     };
 
     let worker;
@@ -130,28 +130,26 @@ document.addEventListener('DOMContentLoaded', () => {
         startBtn.disabled = isRunning;
         pauseBtn.disabled = !isRunning;
         
+        // Determine the correct paused class based on the current stage
+        const pausedClass = currentPhase === 'pre-game' ? 'pre-game-paused' : 'paused';
+
         timeInputs.forEach(input => {
-            input.classList.remove('running', 'paused', 'pre-game-color', 'pre-game-edit');
+            input.classList.remove('running', 'paused', 'pre-game-color', 'pre-game-edit', 'pre-game-paused');
             if (isEditing && currentPhase === 'pre-game') {
                 input.classList.add('pre-game-edit');
                 return;
             }
 
-            if (currentPhase === 'pre-game') {
-                input.classList.add(isRunning ? 'pre-game-color' : 'paused');
+            if (currentPhase === 'pre-game') { // Strategy Stage
+                input.classList.add(isRunning ? 'pre-game-color' : pausedClass);
             } else { // main-game
-                input.classList.add(isRunning ? 'running' : 'paused');
+                input.classList.add(isRunning ? 'running' : pausedClass);
             }
         });
     };
 
     const switchPhase = (newPhase, notifyWorker = true) => {
         currentPhase = newPhase;
-        
-        // BUG FIX: Only pause if the switch is manual (i.e., user-initiated)
-        if (isRunning && notifyWorker) {
-            handlePause();
-        }
         
         if (currentPhase === 'pre-game') {
             preGameBtn.classList.add('active');
@@ -172,10 +170,12 @@ document.addEventListener('DOMContentLoaded', () => {
             currentSecondsInput.value = "00";
         }
         
-        updateTimeFromInputs();
-        // Don't update UI state if the timer is running, as it will handle its own color
-        if (!isRunning) {
-            updateUIState(false);
+        // If the switch is manual (user click), pause the timer and update time from inputs.
+        if (notifyWorker) {
+            if (isRunning) handlePause();
+            updateTimeFromInputs();
+        } else { // If the switch is automatic (from worker), just update the UI state.
+            updateUIState(isRunning);
         }
 
         if (worker && notifyWorker) {
@@ -191,6 +191,16 @@ document.addEventListener('DOMContentLoaded', () => {
             audioUnlocked = true;
         }
         
+        // Get current time to check for the special case
+        const minutes = parseInt(currentMinutesInput.value, 10) || 0;
+        const seconds = parseInt(currentSecondsInput.value, 10) || 0;
+
+        // BUG FIX: If starting at 0:00 in Strategy Stage, switch to Gameplay Stage immediately.
+        if (currentPhase === 'pre-game' && minutes === 0 && seconds === 0) {
+            switchPhase('main-game'); // This handles UI, sets worker phase, and sets time to 0.
+            addToQueue('ding1');      // Manually trigger the transition sound.
+        }
+
         updateTimeFromInputs(); // Sync time before starting
         worker.postMessage({
             command: 'start_or_resume',

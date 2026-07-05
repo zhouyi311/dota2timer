@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dota 2 Event Timer</title>
+    <title>Dota2 Timer - Rune, Lotus, Jungle Stack & Pull | by ez2run</title>
+    <meta name="description" content="Real-time Dota2 event timer to track runes, lotus, jungle spawns, and stack/pull timings. Improve your game sense and efficiency with voice alerts.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Google+Sans+Code:wght@400;700&display=swap" rel="stylesheet">
@@ -11,9 +12,11 @@
 </head>
 <body>
 
+    <link rel="alternate" hreflang="en" href="https://ez2run.com/">
+    <link rel="alternate" hreflang="zh" href="https://ez2run.com/zh/">
     <header class="site-header">
         <div class="header-content">
-            <a href="#" class="brand">ez2.run</a>
+            <a href="https://ez2run.com/" class="brand">ez2run</a>
             <span class="divider">/</span>
             <span class="page-title">Dota2 Timer</span>
         </div>
@@ -21,10 +24,10 @@
 
     <div class="page-content">
         <div class="container">
-            <h1>Dota 2 Event Timer</h1>
+            <h1>Dota2 Event Timer</h1>
             <div class="phase-toggle">
-                <button id="preGameBtn" class="phase-btn">Pre-Game</button>
-                <button id="mainGameBtn" class="phase-btn active">Main Game</button>
+                <button id="preGameBtn" class="phase-btn">Strategy Stage</button>
+                <button id="mainGameBtn" class="phase-btn active">Gameplay Stage</button>
             </div>
 
             <main class="timer-core">
@@ -33,7 +36,7 @@
                         <button id="setTimeZero" class="time-adjust-btn">0:00</button>
                         <button id="setTimeNinety" class="time-adjust-btn">1:30</button>
                     </div>
-                    <div id="editable-time-wrapper">
+                    <div class="time-inputs-container"> 
                         <input type="tel" id="currentMinutes" class="time-input" min="0" max="999" maxlength="3" value="00">
                         <span class="time-separator">:</span>
                         <input type="tel" id="currentSeconds" class="time-input" min="0" max="59" maxlength="2" value="00">
@@ -49,7 +52,7 @@
                     <button id="startBtn" class="pill-btn">Start</button>
                 </div>
             </main>
-
+            
             <!-- New Unified Settings Card -->
             <div class="settings-card full-width">
                 <h2>Settings</h2>
@@ -76,7 +79,7 @@
                         </div>
                         <!-- Jungle -->
                         <div class="grid-row">
-                            <span class="grid-col-event">🐅 Jungle Stacks (1m)</span>
+                            <span class="grid-col-event">🐅 Jungle Pull/Stack (1m)</span>
                             <div class="grid-col-leadtime setting-input-wrapper">
                                 <span>-</span>
                                 <input type="number" id="leadTime1" min="0" value="15">
@@ -88,7 +91,7 @@
                         </div>
                         <!-- River Rune -->
                         <div class="grid-row">
-                            <span class="grid-col-event">💪 Power Runes (2m)</span>
+                            <span class="grid-col-event">💪 Power Rune (2m)</span>
                             <div class="grid-col-leadtime setting-input-wrapper">
                                 <span>-</span>
                                 <input type="number" id="leadTime2" min="0" value="15">
@@ -100,7 +103,7 @@
                         </div>
                         <!-- Lotus -->
                         <div class="grid-row">
-                            <span class="grid-col-event">🪷 Lotus Blooms (3m)</span>
+                            <span class="grid-col-event">🪷 Lotus Bloom (3m)</span>
                             <div class="grid-col-leadtime setting-input-wrapper">
                                 <span>-</span>
                                 <input type="number" id="leadTime3" min="0" value="15">
@@ -112,7 +115,7 @@
                         </div>
                         <!-- XP Rune -->
                         <div class="grid-row">
-                            <span class="grid-col-event">⛩ Wisdom Shine (7m)</span>
+                            <span class="grid-col-event">⛩ Wisdom Rune (7m)</span>
                             <div class="grid-col-leadtime setting-input-wrapper">
                                 <span>-</span>
                                 <input type="number" id="leadTime7" min="0" value="25">
@@ -130,7 +133,7 @@
     </div>
 
     <footer class="site-footer">
-        <p>&copy; 2024 ez2.run. All rights reserved. Not affiliated with Valve Corp.</p>
+        <p>&copy; 2026 ez2run all rights reserved. Not affiliated with Valve</p>
     </footer>
 
     <script src="main.js"></script>
