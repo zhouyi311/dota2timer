@@ -24,16 +24,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const timeInputs = [currentMinutesInput, currentSecondsInput];
 
     // Audio Elements
-    const audioObjects = {
-        ding1: new Audio('audio/ding1.mp3'),
-        ding2: new Audio('audio/ding2.mp3'),
-        ding3: new Audio('audio/ding3.mp3'),
-        special: new Audio('audio/special.mp3'),
-        jungle: new Audio('audio/1-jungle.mp3'),
-        raver_rune: new Audio('audio/2-power-rune.mp3'),
-        lotus: new Audio('audio/3-lotus.mp3'),
-        exp_rune: new Audio('audio/7-wisdom-rune.mp3'),
+    let audioObjects = {};
+    const audioFileNames = {
+        ding1: 'ding1.mp3',
+        ding2: 'ding2.mp3',
+        ding3: 'ding3.mp3',
+        special: 'special.mp3',
+        jungle: '1-jungle.mp3',
+        raver_rune: '2-power-rune.mp3',
+        lotus: '3-lotus.mp3',
+        exp_rune: '7-wisdom-rune.mp3',
     };
+    const localizableAudioKeys = ['jungle', 'raver_rune', 'lotus', 'exp_rune'];
 
     let worker;
     let isRunning = false;
@@ -41,6 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let audioUnlocked = false;
     let audioQueue = [];
     let isPlayingAudio = false;
+    let currentLang = 'en';
 
     // --- Audio Queue ---
     const playNextInQueue = () => {
@@ -95,7 +98,35 @@ document.addEventListener('DOMContentLoaded', () => {
         setVolume(savedVolume);
     };
 
-    const setVolume = (volume) => Object.values(audioObjects).forEach(audio => audio.volume = volume);
+    const setVolume = (volume) => {
+        Object.values(audioObjects).forEach(audio => {
+            if (audio) audio.volume = volume;
+        });
+    };
+
+    const loadAudioForLanguage = (lang) => {
+        const isEnglish = (lang === 'en' || !lang);
+        const langPath = isEnglish ? '' : `${lang}/`;
+
+        for (const key in audioFileNames) {
+            const fileName = audioFileNames[key];
+            let audio;
+
+            // Only apply localization logic to specified voice-over files
+            if (localizableAudioKeys.includes(key) && !isEnglish) {
+                const defaultPath = `audio/${fileName}`;
+                const langPathFull = `audio/${langPath}${fileName}`;
+                audio = new Audio(langPathFull);
+                // Set up a fallback to the English audio on error (e.g., 404 Not Found)
+                audio.onerror = () => { audio.src = defaultPath; };
+            } else {
+                // For universal sounds (dings) or English, load directly
+                audio = new Audio(`audio/${fileName}`);
+            }
+            audioObjects[key] = audio;
+        }
+        setVolume(volumeSlider.value); // Re-apply current volume to new audio objects
+    };
 
     // --- Worker Communication ---
     const initializeWorker = () => {
@@ -191,16 +222,6 @@ document.addEventListener('DOMContentLoaded', () => {
             audioUnlocked = true;
         }
         
-        // Get current time to check for the special case
-        const minutes = parseInt(currentMinutesInput.value, 10) || 0;
-        const seconds = parseInt(currentSecondsInput.value, 10) || 0;
-
-        // BUG FIX: If starting at 0:00 in Strategy Stage, switch to Gameplay Stage immediately.
-        if (currentPhase === 'pre-game' && minutes === 0 && seconds === 0) {
-            switchPhase('main-game'); // This handles UI, sets worker phase, and sets time to 0.
-            addToQueue('ding1');      // Manually trigger the transition sound.
-        }
-
         updateTimeFromInputs(); // Sync time before starting
         worker.postMessage({
             command: 'start_or_resume',
@@ -238,7 +259,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Initialization ---
     const init = () => {
+        // Localization must run before other initializations that depend on text or language
+        initLocalization().then(() => {
         loadSettings();
+        loadAudioForLanguage(getLanguage()); // Load initial audio based on detected language
         initializeWorker();
         
         startBtn.addEventListener('click', handleStart);
@@ -292,6 +316,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 updateTimeFromInputs(); // Ensure time is set to 0
             }, 100);
         }
+
+        // Listen for language changes to reload audio files
+        document.addEventListener('languageChange', (e) => {
+            loadAudioForLanguage(e.detail.lang);
+        });
+        });
     };
 
     init();

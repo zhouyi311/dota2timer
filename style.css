@@ -18,7 +18,7 @@ Design System & Variables
     --color-text-inverse: #0f172a;
     --toggle-active-bg: #4A5568; /* Grey for active toggle */
 
-    --font-family-sans: 'Inter', sans-serif;
+    --font-family-sans: 'Inter', 'Noto Sans SC', sans-serif;
     --font-family-mono: 'Google Sans Code', monospace;
     --font-size-xs: 0.75rem;
     --font-size-sm: 0.875rem;
@@ -69,12 +69,16 @@ body {
 /* ---
 New Global Header & Footer
 --- */
-.site-header { width: 100%; background-color: var(--color-header-bg); border-bottom: 1px solid #e5e7eb; padding: var(--space-2) var(--space-4); }
+.site-header { width: 100%; background-color: var(--color-header-bg); border-bottom: 1px solid #e5e7eb; padding: var(--space-2) var(--space-4); display: flex; align-items: center; justify-content: space-between; }
 .header-content { display: flex; align-items: center; gap: 0.5rem; font-size: var(--font-size-sm); font-weight: 500; }
 .brand { color: var(--color-header-brand); text-decoration: none; transition: var(--transition-base); }
 .brand:hover { color: var(--color-secondary); }
 .divider, .page-title { color: var(--color-header-text); }
 .site-footer { padding: 0; text-align: center; color: var(--color-header-text); font-size: var(--font-size-sm); margin-top: auto; }
+.lang-selector-wrapper { margin-left: auto; } /* Pushes selector to the right */
+#languageSelector { background-color: #fff; border: 1px solid #d1d5db; border-radius: 6px; padding: 0.25rem 0.5rem; font-family: var(--font-family-sans); font-size: var(--font-size-sm); color: var(--color-header-brand); cursor: pointer; }
+#languageSelector:focus { outline: 2px solid var(--color-primary); }
+
 
 /* ---
 Main Container (Card)
@@ -114,7 +118,7 @@ Timer Core
 /* This new class is for the horizontal grouping of time inputs */
 .time-inputs-container { display: flex; align-items: center; }
 
-.time-input { font-family: var(--font-family-mono); font-size: var(--font-size-4xl); font-weight: 700; color: var(--color-text-base); background-color: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; width: 4ch; text-align: center; padding: var(--space-1) 0; -moz-appearance: textfield; transition: var(--transition-base); }
+.time-input { font-family: var(--font-family-mono); font-size: var(--font-size-4xl); font-weight: 700; color: var(--color-text-base); background-color: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; width: 4ch; text-align: center; padding: var(--space-1) 0; appearance: textfield; -moz-appearance: textfield; transition: var(--transition-base); }
 .time-input:hover { background-color: rgba(0,0,0,0.3); border-color: rgba(255,255,255,0.2); }
 .time-input:focus { outline: none; background-color: rgba(0,0,0,0.4); border-color: var(--color-primary); }
 .time-input::-webkit-inner-spin-button, .time-input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
@@ -178,7 +182,7 @@ Settings Card (Systematized)
 Volume Row (inside Settings Card)
 --- */
 .setting-item { display: flex; align-items: center; justify-content: space-between; }
-.setting-label { font-weight: 500; white-space: nowrap; }
+.setting-label { font-weight: 500; white-space: nowrap; margin-block-start: 0; margin-block-end: 0; }
 #volume-control { display: flex; align-items: center; gap: var(--space-2); width: 60%; }
 #volume-control #volumeValue { font-family: var(--font-family-mono); font-size: var(--font-size-sm); background-color: rgba(0,0,0,0.2); padding: 0.2rem 0.5rem; border-radius: 6px; min-width: 4ch; text-align: center; }
 

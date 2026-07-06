@@ -57,13 +57,16 @@ function checkAndAnnounce() {
  */
 function tick() {
     if (gamePhase === 'pre-game') {
-        totalSeconds++; // Will count up from negative
-        if (totalSeconds === 0) {
+        // If time is 0 or positive while in pre-game, it's time to switch.
+        // This check happens only when the timer is running.
+        if (totalSeconds >= 0) {
             // Transition from pre-game to main-game
             gamePhase = 'main-game';
+            totalSeconds = 0; // Ensure we start main-game at exactly 0
             self.postMessage({ type: 'phase_change', newPhase: 'main-game' });
             self.postMessage({ type: 'audio', sounds: ['ding1'] });
         }
+        totalSeconds++; // Count up from negative, or from 0 if we just switched.
     } else { // 'main-game'
         totalSeconds++;
         checkAndAnnounce();
@@ -102,6 +105,7 @@ self.onmessage = function(e) {
         case 'set_time':
             totalSeconds = data.timeOffset;
             if (!isRunning) {
+                // When paused, simply update the time display without any side effects.
                 self.postMessage({ type: 'time', totalSeconds, workerIsRunning: isRunning });
             }
             break;

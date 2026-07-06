@@ -7,7 +7,7 @@
     <meta name="description" content="Real-time Dota2 event timer to track runes, lotus, jungle spawns, and stack/pull timings. Improve your game sense and efficiency with voice alerts.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Google+Sans+Code:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Google+Sans+Code:wght@400;700&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -20,14 +20,17 @@
             <span class="divider">/</span>
             <span class="page-title">Dota2 Timer</span>
         </div>
+        <div class="lang-selector-wrapper">
+            <select id="languageSelector"></select>
+        </div>
     </header>
 
     <div class="page-content">
         <div class="container">
-            <h1>Dota2 Event Timer</h1>
+            <h1 data-i18n-key="main-title">Dota2 Event Timer</h1>
             <div class="phase-toggle">
-                <button id="preGameBtn" class="phase-btn">Strategy Stage</button>
-                <button id="mainGameBtn" class="phase-btn active">Gameplay Stage</button>
+                <button id="preGameBtn" class="phase-btn" data-i18n-key="pre-game-phase">Strategy Phase</button>
+                <button id="mainGameBtn" class="phase-btn active" data-i18n-key="main-game-phase">Game Phase</button>
             </div>
 
             <main class="timer-core">
@@ -46,40 +49,28 @@
                         <button id="adjustTimeMinus" class="time-adjust-btn">-1s</button>
                     </div>
                 </div>
-                <p class="edit-hint">Click on the time to edit.</p>
+                <p class="edit-hint" data-i18n-key="edit-hint">Click on the time to edit.</p>
                 <div class="timer-controls">
-                    <button id="pauseBtn" class="pill-btn">Pause</button>
-                    <button id="startBtn" class="pill-btn">Start</button>
+                    <button id="pauseBtn" class="pill-btn" data-i18n-key="pause">Pause</button>
+                    <button id="startBtn" class="pill-btn" data-i18n-key="start">Start</button>
                 </div>
             </main>
             
             <!-- New Unified Settings Card -->
             <div class="settings-card full-width">
-                <h2>Settings</h2>
-                
-                <div class="setting-group">
-                    <div class="setting-item volume-row">
-                        <label for="volumeSlider" class="setting-label">Alert Volume</label>
-                        <div class="input-group" id="volume-control">
-                            <span id="volumeValue">0.6</span>
-                            <input type="range" id="volumeSlider" min="0" max="1" step="0.05" value="0.6">
-                        </div>
-                    </div>
-                </div>
+                <!-- <h2 data-i18n-key="settings-title">Settings</h2> -->
 
                 <div class="setting-group">
-                    <div class="setting-item">
-                        <span class="setting-label">Alert Options</span>
-                    </div>
+                    <!-- <h3 class="setting-label" data-i18n-key="alert-options-title">Alert Options</h3> -->
                     <div class="announcement-settings-grid">
                         <div class="grid-header">
-                            <span class="grid-col-event">Periodic Spawns (Interval)</span>
-                            <span class="grid-col-leadtime">Lead Alert</span>
-                            <span class="grid-col-voiceover">Voiceover</span>
+                            <span class="grid-col-event" data-i18n-key="event">Periodic Events (Interval)</span>
+                            <span class="grid-col-leadtime" data-i18n-key="lead-time">Lead Time</span>
+                            <span class="grid-col-voiceover" data-i18n-key="voiceover">Voiceover</span>
                         </div>
                         <!-- Jungle -->
                         <div class="grid-row">
-                            <span class="grid-col-event">🐅 Jungle Pull/Stack (1m)</span>
+                            <span class="grid-col-event" data-i18n-key="neutral-stack">🐅 Jungle Pull/Stack (1m)</span>
                             <div class="grid-col-leadtime setting-input-wrapper">
                                 <span>-</span>
                                 <input type="number" id="leadTime1" min="0" value="15">
@@ -91,7 +82,7 @@
                         </div>
                         <!-- River Rune -->
                         <div class="grid-row">
-                            <span class="grid-col-event">💪 Power Rune (2m)</span>
+                            <span class="grid-col-event" data-i18n-key="power-rune">💪 Power Rune (2m)</span>
                             <div class="grid-col-leadtime setting-input-wrapper">
                                 <span>-</span>
                                 <input type="number" id="leadTime2" min="0" value="15">
@@ -103,7 +94,7 @@
                         </div>
                         <!-- Lotus -->
                         <div class="grid-row">
-                            <span class="grid-col-event">🪷 Lotus Bloom (3m)</span>
+                            <span class="grid-col-event" data-i18n-key="lotus">🪷 Lotus Bloom (3m)</span>
                             <div class="grid-col-leadtime setting-input-wrapper">
                                 <span>-</span>
                                 <input type="number" id="leadTime3" min="0" value="15">
@@ -115,7 +106,7 @@
                         </div>
                         <!-- XP Rune -->
                         <div class="grid-row">
-                            <span class="grid-col-event">⛩ Wisdom Rune (7m)</span>
+                            <span class="grid-col-event" data-i18n-key="wisdom-rune">⛩ Wisdom Rune (7m)</span>
                             <div class="grid-col-leadtime setting-input-wrapper">
                                 <span>-</span>
                                 <input type="number" id="leadTime7" min="0" value="25">
@@ -126,7 +117,17 @@
                             </div>
                         </div>
                     </div>
-                    <p class="settings-note">Alerts occur only once per minute. For overlapping events, alert leading time for that specific minute will be determined by priority: Wisdom (highest) → Lotus → Power → Stacks (lowest)</p>
+                    <p class="settings-note" data-i18n-key="priority-note">Notifications occur only once per minute. For overlapping events, alert leading time for that specific minute will be determined by priority: Wisdom (highest) → Lotus → Power → Stacks (lowest)</p>
+                </div>
+
+                <div class="setting-group">
+                    <div class="setting-item volume-row">
+                        <label for="volumeSlider" class="setting-label" data-i18n-key="volume">Volume</label>
+                        <div class="input-group" id="volume-control">
+                            <span id="volumeValue">0.6</span>
+                            <input type="range" id="volumeSlider" min="0" max="1" step="0.05" value="0.6">
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -136,6 +137,7 @@
         <p>&copy; 2026 ez2run all rights reserved. Not affiliated with Valve</p>
     </footer>
 
+    <script src="localization.js"></script>
     <script src="main.js"></script>
 </body>
 </html>
