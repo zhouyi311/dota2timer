@@ -4,15 +4,15 @@ let isRunning = false;
 let gamePhase = 'pre-game'; // 'pre-game' or 'main-game'
 let leadTimes = {};
 let voiceoverSettings = {};
-
+let announcementSchedule = [];
 
 /**
- * Checks for upcoming events and queues audio announcements.
- * Implements a priority system (7 > 3 > 2 > 1) to avoid multiple announcements at the same time.
- * Also ensures that no announcements are made for events happening at or before 0:00 game time.
+ * Generates a schedule of upcoming announcements.
+ * This function calculates the exact second each event should be announced
+ * and what sounds to play, respecting event priority.
  */
-function checkAndAnnounce() {
-    // This function is called every second. We need to find which event, if any, is being announced.
+function generateSchedule() {
+    const scheduleHorizon = totalSeconds + 3 * 60; // Look ahead 3 minutes
     const events = [
         { interval: 7, lead: leadTimes[7], voice: 'exp_rune', sound: 'special', setting: voiceoverSettings.exp_rune },
         { interval: 3, lead: leadTimes[3], voice: 'lotus', sound: 'ding3', setting: voiceoverSettings.lotus },
@@ -20,36 +20,36 @@ function checkAndAnnounce() {
         { interval: 1, lead: leadTimes[1], voice: 'jungle', sound: 'ding1', setting: voiceoverSettings.jungle },
     ];
 
-    let triggeredEvent = null;
+    const scheduledMinutes = {}; // Key: minute, Value: highest priority event for that minute
 
-    // Find the highest priority event that is being announced RIGHT NOW.
-    for (const event of events) {
-        const nextEventTime = Math.ceil((totalSeconds + 1) / (event.interval * 60)) * (event.interval * 60);
-        const announceTime = nextEventTime - event.lead;
+    // Determine the highest priority event for each upcoming minute
+    const startMinute = Math.floor(totalSeconds / 60) + 1;
+    const endMinute = Math.floor(scheduleHorizon / 60);
 
-        if (totalSeconds === announceTime && nextEventTime > 0) {
-            triggeredEvent = event;
-            break; // Found the highest priority trigger
-        }
-    }
-
-    if (triggeredEvent) {
-        const soundsToPlay = [];
-        const targetMinute = Math.ceil((totalSeconds + 1) / 60);
-
-        // 1. Add the single, highest-priority base sound
-        soundsToPlay.push(triggeredEvent.sound);
-
-        // 2. Check ALL events to build the voiceover chain
+    for (let minute = startMinute; minute <= endMinute; minute++) {
         for (const event of events) {
-            // If the target minute is a multiple of the interval and the voiceover is checked
-            if (targetMinute % event.interval === 0 && event.setting) {
-                soundsToPlay.push(event.voice);
+            if (minute > 0 && minute % event.interval === 0) {
+                scheduledMinutes[minute] = event; // The first event found is the highest priority
+                break;
             }
         }
-
-        self.postMessage({ type: 'audio', sounds: soundsToPlay });
     }
+
+    // Now, build the final schedule from the prioritized minutes
+    const newSchedule = [];
+    for (const minute in scheduledMinutes) {
+        const event = scheduledMinutes[minute];
+        const eventTimeInSeconds = minute * 60;
+        const announceTime = eventTimeInSeconds - event.lead;
+
+        const soundsToPlay = [event.sound];
+        if (event.setting) soundsToPlay.push(event.voice);
+        
+        newSchedule.push({ announceTime, sounds: soundsToPlay });
+    }
+
+    announcementSchedule = newSchedule
+        .sort((a, b) => a.announceTime - b.announceTime);
 }
 
 /**
@@ -69,7 +69,22 @@ function tick() {
         totalSeconds++; // Count up from negative, or from 0 if we just switched.
     } else { // 'main-game'
         totalSeconds++;
-        checkAndAnnounce();
+
+        // Safeguard: Discard any scheduled announcements that have been missed due to time jumps.
+        while (announcementSchedule.length > 0 && totalSeconds > announcementSchedule[0].announceTime) {
+            announcementSchedule.shift();
+        }
+
+        // If the schedule is running low, or we just cleared it, regenerate.
+        if (announcementSchedule.length < 3) {
+            generateSchedule();
+        }
+
+        // Now, check if the (now guaranteed to be correct) next event should be announced.
+        if (announcementSchedule.length > 0 && totalSeconds === announcementSchedule[0].announceTime) {
+            self.postMessage({ type: 'audio', sounds: announcementSchedule[0].sounds });
+            announcementSchedule.shift(); // Remove the event we just announced.
+        }
     }
     
     self.postMessage({ type: 'time', totalSeconds, workerIsRunning: isRunning });
@@ -84,6 +99,7 @@ self.onmessage = function(e) {
         case 'start_or_resume':
             if (data.leadTimes) leadTimes = data.leadTimes;
             if (data.voiceoverSettings) voiceoverSettings = data.voiceoverSettings;
+            generateSchedule(); // Generate the initial schedule
 
             if (!isRunning) {
                 isRunning = true;
@@ -105,6 +121,7 @@ self.onmessage = function(e) {
         case 'set_time':
             totalSeconds = data.timeOffset;
             if (!isRunning) {
+                if (gamePhase === 'main-game') generateSchedule(); // Regenerate schedule if time is changed while paused
                 // When paused, simply update the time display without any side effects.
                 self.postMessage({ type: 'time', totalSeconds, workerIsRunning: isRunning });
             }
@@ -112,6 +129,7 @@ self.onmessage = function(e) {
 
         case 'set_phase':
             gamePhase = data.phase;
+            if (gamePhase === 'main-game') generateSchedule();
             // When phase is set manually, time is already set by main thread.
             // We just need to acknowledge the phase.
             break;
@@ -122,6 +140,7 @@ self.onmessage = function(e) {
             if (gamePhase === 'main-game' && totalSeconds < 0) {
                 totalSeconds = 0;
             }
+            if (gamePhase === 'main-game') generateSchedule(); // Time was adjusted, schedule might be off
             self.postMessage({ type: 'time', totalSeconds, workerIsRunning: isRunning });
             break;
     }
