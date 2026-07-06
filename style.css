@@ -50,20 +50,17 @@ html { -webkit-text-size-adjust: 100%; }
 body {
     font-family: var(--font-family-sans);
     background-color: var(--color-page-bg);
-    color: var(--color-text-inverse);
     margin: 0;
     display: flex;
     flex-direction: column;
     min-height: 100vh;
 }
 
-.page-content {
+.page-content { /* Bootstrap's container-fluid handles padding */
     flex-grow: 1;
     display: flex;
     justify-content: center;
     align-items: flex-start;
-    padding: 0 var(--space-4);
-    width: 100%;
 }
 
 /* ---
@@ -71,11 +68,10 @@ New Global Header & Footer
 --- */
 .site-header { width: 100%; background-color: var(--color-header-bg); border-bottom: 1px solid #e5e7eb; padding: var(--space-2) var(--space-4); display: flex; align-items: center; justify-content: space-between; }
 .header-content { display: flex; align-items: center; gap: 0.5rem; font-size: var(--font-size-sm); font-weight: 500; }
-.brand { color: var(--color-header-brand); text-decoration: none; transition: var(--transition-base); }
+.brand { color: var(--color-header-brand); text-decoration: none; transition: var(--transition-base); font-weight: 600; }
 .brand:hover { color: var(--color-secondary); }
 .divider, .page-title { color: var(--color-header-text); }
-.site-footer { padding: 0; text-align: center; color: var(--color-header-text); font-size: var(--font-size-sm); margin-top: auto; }
-.lang-selector-wrapper { margin-left: auto; } /* Pushes selector to the right */
+.site-footer { padding: var(--space-3) 0; text-align: center; color: var(--color-header-text); font-size: var(--font-size-sm); margin-top: auto; }
 #languageSelector { background-color: #fff; border: 1px solid #d1d5db; border-radius: 6px; padding: 0.25rem 0.5rem; font-family: var(--font-family-sans); font-size: var(--font-size-sm); color: var(--color-header-brand); cursor: pointer; }
 #languageSelector:focus { outline: 2px solid var(--color-primary); }
 
@@ -90,13 +86,13 @@ Main Container (Card)
     color: var(--color-text-base);
     padding: var(--space-4);
     border-radius: var(--border-radius-lg);
-    box-shadow: var(--shadow-soft);
-    width: 100%;
     max-width: 850px;
     display: flex;
     flex-direction: column;
     gap: var(--space-3);
     margin-top: var(--space-4);
+    margin-bottom: var(--space-4);
+    border: 1px solid var(--color-border);
 }
 .container h1 { font-family: var(--font-family-sans); font-size: var(--font-size-2xl); font-weight: 600; color: var(--color-primary); text-align: center; margin: 0 0 var(--space-2) 0; }
 .container h2 { font-size: var(--font-size-lg); font-weight: 600; color: var(--color-text-base); margin: 0; padding-bottom: var(--space-2); border-bottom: 1px solid var(--color-border); }
@@ -167,22 +163,27 @@ Settings Card (Systematized)
 
 /* A setting group is a major section in the settings card. */
 .setting-group {
-    padding: var(--space-3) 0; /* Vertical padding defines the large "trunk" spacing. */
+    padding: var(--space-3) var(--space-2); /* Vertical padding defines the large "trunk" spacing. */
     border-bottom: 1px solid var(--color-border);
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-2); /* Controls spacing for items *within* a group (e.g., grid and note). */
 }
 
 .settings-card > .setting-group:last-child {
     border-bottom: none;
 }
 
+/* --- Preset Buttons --- */
+.preset-buttons { display: flex; gap: var(--space-1); }
+.preset-btn {
+    padding: 0.4rem 0.8rem; font-size: var(--font-size-sm); font-weight: 600; border-radius: 8px;
+    border: 1px solid var(--color-border); background-color: rgba(0,0,0,0.2); color: var(--color-text-muted);
+    cursor: pointer; transition: var(--transition-base); min-width: 40px; text-align: center;
+}
+.preset-btn.active, .preset-btn:hover { background-color: var(--toggle-active-bg); color: var(--color-text-base); }
+
 /* ---
 Volume Row (inside Settings Card)
 --- */
-.setting-item { display: flex; align-items: center; justify-content: space-between; }
-.setting-label { font-weight: 500; white-space: nowrap; margin-block-start: 0; margin-block-end: 0; }
+.setting-label { font-weight: 600; white-space: nowrap; margin-block-start: 0; margin-block-end: 0; font-size: var(--font-size-base); }
 #volume-control { display: flex; align-items: center; gap: var(--space-2); width: 60%; }
 #volume-control #volumeValue { font-family: var(--font-family-mono); font-size: var(--font-size-sm); background-color: rgba(0,0,0,0.2); padding: 0.2rem 0.5rem; border-radius: 6px; min-width: 4ch; text-align: center; }
 
@@ -193,43 +194,25 @@ Announcement Settings
     /* This is now just a simple container. Spacing is handled by rows. */
 }
 
-.grid-header, .grid-row {
-    display: flex;
-    align-items: center;
-    width: 100%;
+.event-name-group {
+    gap: var(--space-2);
 }
-.grid-header {
-    font-size: var(--font-size-xs);
-    color: var(--color-text-muted);
-    /* text-transform: uppercase; */
-    padding-bottom: var(--space-2);
-    border-bottom: 2px solid var(--color-border);
-}
-.grid-row {
-    padding: var(--space-2) 0;
-    border-bottom: 1px solid var(--color-border);
+.event-label { font-size: var(--font-size-sm); color: var(--color-text-base); cursor: pointer; }
+
+.event-options-group {
+    gap: var(--space-4);
 }
 
-.announcement-settings-grid > .grid-row:last-of-type {
-    /* border-bottom: none; */
-}
-
-/* Responsive columns for the grid */
-.grid-col-event {
-    flex: 1; min-width: 0; text-align: left; white-space: normal; padding-right: var(--space-2);
-}
-.grid-row .grid-col-event {
-    color: var(--color-text-base);
-    font-size: var(--font-size-sm);
-}
-.grid-col-leadtime { width: 90px; text-align: center; flex-shrink: 0; }
-.grid-col-voiceover { width: 70px; text-align: center; flex-shrink: 0; }
-
-.setting-input-wrapper { display: flex; justify-content: center; align-items: center; gap: 0.5ch; color: var(--color-text-muted); }
+.setting-input-wrapper { gap: 0.5ch; color: var(--color-text-muted); font-size: var(--font-size-sm); }
 .setting-input-wrapper input[type="number"] { height: 1.4rem; line-height: 1.4rem; width: 52px; background: #000; color: var(--color-text-base); border: 1px solid var(--color-border); border-radius: 8px; padding: 0 0.5rem; text-align: center; }
-.grid-col-voiceover { display: flex; justify-content: center; align-items: center; }
 
-.settings-note { padding: 0; margin: 0; font-size: var(--font-size-xs); color: var(--color-text-muted); line-height: 1.5; }
+.voiceover-wrapper { gap: 0.5ch; color: var(--color-text-muted); }
+.voiceover-wrapper label { font-size: var(--font-size-sm); cursor: pointer; }
+
+/* Make the auto-stop input slightly wider than the lead time inputs */
+#autoStopTime {
+    width: 70px;
+}
 
 /* ---
 Custom Controls
@@ -246,9 +229,11 @@ input[type="checkbox"]:checked { accent-color: var(--color-primary); }
 /* ---
 Responsive
 --- */
-@media (max-width: 600px) {
-    .page-content { padding: 0; }
-    .container { margin-top: 0; padding: var(--space-3); border-radius: 0; }
+@media (max-width: 767px) { /* Bootstrap's md breakpoint */
+    .setting-group.row, .grid-row.row {
+        gap: var(--space-2);
+    }
+    .container { margin-top: 0; padding: var(--space-3); border-radius: 0; margin-bottom: 0; }
     #time-display-wrapper { gap: var(--space-2); } /* Reduce gap on mobile */
     .time-input { font-size: 2.5rem; } /* Shrink time font on mobile */
     .container h1 { font-size: var(--font-size-xl); margin-top: var(--space-3); }

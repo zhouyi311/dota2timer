@@ -8,6 +8,9 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Google+Sans+Code:wght@400;700&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <!-- Custom styles (must be AFTER Bootstrap) -->
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -15,17 +18,19 @@
     <link rel="alternate" hreflang="en" href="https://ez2run.com/">
     <link rel="alternate" hreflang="zh" href="https://ez2run.com/zh/">
     <header class="site-header">
-        <div class="header-content">
-            <a href="https://ez2run.com/" class="brand">ez2run</a>
-            <span class="divider">/</span>
-            <span class="page-title">Dota2 Timer</span>
-        </div>
-        <div class="lang-selector-wrapper">
-            <select id="languageSelector"></select>
+        <div class="container-fluid d-flex justify-content-between align-items-center">
+            <div class="header-content">
+                <a href="https://ez2run.com/" class="brand">ez2run</a>
+                <span class="divider">/</span>
+                <span class="page-title">Dota2 Timer</span>
+            </div>
+            <div class="lang-selector-wrapper">
+                <select id="languageSelector"></select>
+            </div>
         </div>
     </header>
 
-    <div class="page-content">
+    <div class="page-content container-fluid">
         <div class="container">
             <h1 data-i18n-key="main-title">Dota2 Event Timer</h1>
             <div class="phase-toggle">
@@ -60,75 +65,115 @@
             <div class="settings-card full-width">
                 <!-- <h2 data-i18n-key="settings-title">Settings</h2> -->
 
-                <div class="setting-group">
-                    <!-- <h3 class="setting-label" data-i18n-key="alert-options-title">Alert Options</h3> -->
-                    <div class="announcement-settings-grid">
-                        <div class="grid-header">
-                            <span class="grid-col-event" data-i18n-key="event">Periodic Events (Interval)</span>
-                            <span class="grid-col-leadtime" data-i18n-key="lead-time">Lead Time</span>
-                            <span class="grid-col-voiceover" data-i18n-key="voiceover">Voiceover</span>
-                        </div>
-                        <!-- Jungle -->
-                        <div class="grid-row">
-                            <span class="grid-col-event" data-i18n-key="neutral-stack">🧌 Jungle Pull/Stack (1m)</span>
-                            <div class="grid-col-leadtime setting-input-wrapper">
-                                <span>-</span>
-                                <input type="number" id="leadTime1" min="0" value="15">
-                                <span>s</span>
-                            </div>
-                            <div class="grid-col-voiceover">
-                                <input type="checkbox" id="toggleJungle" checked>
-                            </div>
-                        </div>
-                        <!-- River Rune -->
-                        <div class="grid-row">
-                            <span class="grid-col-event" data-i18n-key="power-rune">🌟 Power Rune (2m)</span>
-                            <div class="grid-col-leadtime setting-input-wrapper">
-                                <span>-</span>
-                                <input type="number" id="leadTime2" min="0" value="15">
-                                <span>s</span>
-                            </div>
-                            <div class="grid-col-voiceover">
-                                <input type="checkbox" id="toggleRaverRune" checked>
-                            </div>
-                        </div>
-                        <!-- Lotus -->
-                        <div class="grid-row">
-                            <span class="grid-col-event" data-i18n-key="lotus">🪷 Lotus Bloom (3m)</span>
-                            <div class="grid-col-leadtime setting-input-wrapper">
-                                <span>-</span>
-                                <input type="number" id="leadTime3" min="0" value="15">
-                                <span>s</span>
-                            </div>
-                            <div class="grid-col-voiceover">
-                                <input type="checkbox" id="toggleLotus" checked>
-                            </div>
-                        </div>
-                        <!-- XP Rune -->
-                        <div class="grid-row">
-                            <span class="grid-col-event" data-i18n-key="wisdom-rune">💜 Wisdom Rune (7m)</span>
-                            <div class="grid-col-leadtime setting-input-wrapper">
-                                <span>-</span>
-                                <input type="number" id="leadTime7" min="0" value="25">
-                                <span>s</span>
-                            </div>
-                            <div class="grid-col-voiceover">
-                                <input type="checkbox" id="toggleExpRune" checked>
-                            </div>
-                        </div>
+                <div class="setting-group row align-items-center">
+                    <h3 class="setting-label col-md-4" data-i18n-key="presets-title">Presets</h3>
+                    <div class="preset-buttons col-md-8 d-flex justify-content-start justify-content-md-end">
+                        <button class="preset-btn" data-role="1" data-i18n-key="preset-pos1">pos1</button>
+                        <button class="preset-btn" data-role="2" data-i18n-key="preset-pos2">pos2</button>
+                        <button class="preset-btn" data-role="3" data-i18n-key="preset-pos3">pos3</button>
+                        <button class="preset-btn" data-role="45" data-i18n-key="preset-pos45">pos4/5</button>
+                        <button class="preset-btn active" data-role="all" data-i18n-key="preset-all">All</button>
                     </div>
-                    <p class="settings-note" data-i18n-key="priority-note">Notifications occur only once per minute. For overlapping events, alert leading time for that specific minute will be determined by priority: Wisdom (highest) → Lotus → Power → Stacks (lowest)</p>
                 </div>
 
                 <div class="setting-group">
-                    <div class="setting-item volume-row">
-                        <label for="volumeSlider" class="setting-label" data-i18n-key="volume">Volume</label>
-                        <div class="input-group" id="volume-control">
+                    <h3 class="setting-label" data-i18n-key="events-title">Events</h3>
+                    <div class="announcement-settings-grid mt-3">
+                        <!-- Jungle -->
+                        <div class="row align-items-center py-3 border-bottom border-light border-opacity-10">
+                            <div class="event-name-group col-md-6 d-flex align-items-center">
+                                <input type="checkbox" id="enableJungle" data-event-master="jungle" class="me-3" checked>
+                                <label for="enableJungle" class="event-label" data-i18n-key="neutral-stack">🧌 Jungle Pull/Stack (1m)</label>
+                            </div>
+                            <div class="event-options-group col-md-6 d-flex align-items-center justify-content-md-end">
+                                <div class="setting-input-wrapper">
+                                    <span data-i18n-key="lead-time">Lead Time</span>
+                                    <input type="number" id="leadTime1" min="0" value="15">
+                                    <span>s</span>
+                                </div>
+                                <div class="voiceover-wrapper">
+                                    <input type="checkbox" id="toggleJungle" checked>
+                                    <label for="toggleJungle" data-i18n-key="voiceover">Voiceover</label>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- River Rune -->
+                        <div class="row align-items-center py-3 border-bottom border-light border-opacity-10">
+                            <div class="event-name-group col-md-6 d-flex align-items-center">
+                                <input type="checkbox" id="enablePowerRune" data-event-master="power" class="me-3" checked>
+                                <label for="enablePowerRune" class="event-label" data-i18n-key="power-rune">🌟 Power Rune (2m)</label>
+                            </div>
+                            <div class="event-options-group col-md-6 d-flex align-items-center justify-content-md-end">
+                                <div class="setting-input-wrapper">
+                                    <span data-i18n-key="lead-time">Lead Time</span>
+                                    <input type="number" id="leadTime2" min="0" value="15">
+                                    <span>s</span>
+                                </div>
+                                <div class="voiceover-wrapper">
+                                    <input type="checkbox" id="toggleRaverRune" checked>
+                                    <label for="toggleRaverRune" data-i18n-key="voiceover">Voiceover</label>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Lotus -->
+                        <div class="row align-items-center py-3 border-bottom border-light border-opacity-10">
+                            <div class="event-name-group col-md-6 d-flex align-items-center">
+                                <input type="checkbox" id="enableLotus" data-event-master="lotus" class="me-3" checked>
+                                <label for="enableLotus" class="event-label" data-i18n-key="lotus">🪷 Lotus Bloom (3m)</label>
+                            </div>
+                            <div class="event-options-group col-md-6 d-flex align-items-center justify-content-md-end">
+                                <div class="setting-input-wrapper">
+                                    <span data-i18n-key="lead-time">Lead Time</span>
+                                    <input type="number" id="leadTime3" min="0" value="15">
+                                    <span>s</span>
+                                </div>
+                                <div class="voiceover-wrapper">
+                                    <input type="checkbox" id="toggleLotus" checked>
+                                    <label for="toggleLotus" data-i18n-key="voiceover">Voiceover</label>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- XP Rune -->
+                        <div class="row align-items-center py-3">
+                            <div class="event-name-group col-md-6 d-flex align-items-center">
+                                <input type="checkbox" id="enableWisdomRune" data-event-master="wisdom" class="me-3" checked>
+                                <label for="enableWisdomRune" class="event-label" data-i18n-key="wisdom-rune">💜 Wisdom Rune (7m)</label>
+                            </div>
+                            <div class="event-options-group col-md-6 d-flex align-items-center justify-content-md-end">
+                                <div class="setting-input-wrapper">
+                                    <span data-i18n-key="lead-time">Lead Time</span>
+                                    <input type="number" id="leadTime7" min="0" value="25">
+                                    <span>s</span>
+                                </div>
+                                <div class="voiceover-wrapper">
+                                    <input type="checkbox" id="toggleExpRune" checked>
+                                    <label for="toggleExpRune" data-i18n-key="voiceover">Voiceover</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    </div>
+
+                <div class="setting-group row align-items-center">
+                    <div class="setting-item col-md-12 d-flex align-items-center justify-content-between">
+                        <h3 class="setting-label" data-i18n-key="auto-stop-timer">Timer Limit</h3>
+                        <div class="setting-input-wrapper d-flex align-items-center">
+                            <input type="number" id="autoStopTime" min="1" value="120">
+                            <span data-i18n-key="minutes-unit">min</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="setting-group row align-items-center">
+                    <div class="setting-item volume-row col-md-12 d-flex align-items-center justify-content-between">
+                        <h3 class="setting-label" data-i18n-key="volume">Volume</h3>
+                        <div class="d-flex align-items-center" id="volume-control">
                             <span id="volumeValue">0.6</span>
                             <input type="range" id="volumeSlider" min="0" max="1" step="0.05" value="0.6">
                         </div>
                     </div>
                 </div>
+
             </div>
         </div>
     </div>
