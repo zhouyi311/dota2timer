@@ -54,42 +54,60 @@ document.addEventListener('DOMContentLoaded', () => {
     let isPlayingAudio = false;
     let currentLang = 'en';
 
+    // Single Source of Truth for event configuration, in priority order.
+    const EVENT_CONFIG = [
+        { key: 'wisdom', leadTimeKey: 7, ding: 'special', voice: 'exp_rune' },
+        { key: 'lotus',  leadTimeKey: 3, ding: 'ding3', voice: 'lotus' },
+        { key: 'power',  leadTimeKey: 2, ding: 'ding2', voice: 'raver_rune' },
+        { key: 'jungle', leadTimeKey: 1, ding: 'ding1', voice: 'jungle' },
+    ];
+
     // --- Audio Queue ---
     const playNextInQueue = () => {
         if (audioQueue.length === 0 || !audioUnlocked) {
-            isPlayingAudio = false;
-            return;
+            isPlayingAudio = false; return;
         }
 
-        const event = audioQueue.shift();
+        const soundEvent = audioQueue.shift();
+        const { soundKey, masterKey, isVoiceover } = soundEvent;
 
-        // If audio is already playing (i.e., this is not the first sound in the sequence)
-        // and the next event is an 'alert', skip it.
-        if (isPlayingAudio && event.type === 'alert') {
+        // If audio is already playing and the next sound is a non-voiceover (an alert/ding), skip it.
+        if (isPlayingAudio && !isVoiceover) {
             playNextInQueue();
             return;
         }
-        isPlayingAudio = true; // Set the flag only AFTER we decide to play something.
 
-        const audioKey = event.payload;
+        // --- The new playback logic, as you requested ---
+        // 1. Check the master toggle for this event.
+        const masterToggles = getMasterToggles();
+        if (!masterToggles[masterKey]) {
+            playNextInQueue(); // Master toggle is off, skip this sound and check the next one.
+            return;
+        }
 
-        const audio = audioObjects[audioKey];
+        // 2. If it's a voiceover, check the specific voiceover toggle.
+        if (isVoiceover) {
+            const voiceoverToggles = getVoiceoverSettings();
+            // Use the correct key for lookup. For runes, the key in getVoiceoverSettings is the full soundKey.
+            // For others like 'jungle', the key is the same as the soundKey.
+            const voiceoverKey = (soundKey === 'raver_rune' || soundKey === 'exp_rune') 
+                ? soundKey : soundKey.replace('_rune', '');
+            if (!voiceoverToggles[voiceoverKey]) {
+                playNextInQueue(); // Voiceover toggle is off, skip and check next.
+                return;
+            }
+        }
+
+        // 3. If all checks pass, play the sound.
+        isPlayingAudio = true;
+        const audio = audioObjects[soundKey];
 
         if (audio) {
             audio.onended = playNextInQueue;
-            audio.onerror = (e) => {
-                console.error(`Error playing ${audioKey}`, e);
-                playNextInQueue(); // Continue queue on error
-            };
-            audio.play().catch(e => {
-                // This error is common if the user hasn't interacted with the page yet.
-                // It's logged as a warning instead of an error.
-                console.warn(`Playback of ${audioKey} was prevented.`, e);
-                playNextInQueue(); // Continue queue on play rejection
-            });
+            audio.onerror = (e) => { console.error(`Error playing ${soundKey}`, e); playNextInQueue(); };
+            audio.play().catch(e => { console.warn(`Playback of ${soundKey} was prevented.`, e); playNextInQueue(); });
         } else {
-            // If audio object doesn't exist, immediately try to play the next in queue
-            console.warn(`Audio key "${audioKey}" not found.`);
+            console.warn(`Audio key "${soundKey}" not found.`);
             playNextInQueue();
         }
     };
@@ -195,58 +213,28 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log("Generating new timeline...");
         const timeline = {};
         const leadTimes = getLeadTimes();
-        const voiceovers = getVoiceoverSettings();
-        const masterToggles = getMasterToggles();
-        const autoStop = getAutoStopSettings();
-        const maxTime = (autoStop.time + 1) * 60; // Generate timeline up to the auto-stop time
+        const autoStopSettings = getAutoStopSettings();
+        const maxTime = (autoStopSettings.time + 1) * 60; // Generate timeline up to the auto-stop time
 
-        const addEvent = (time, event) => {
+        const addEvent = (time, eventType) => {
             if (time < 0) return;
             if (!timeline[time]) timeline[time] = [];
-            timeline[time].push(event);
-        };
-
-        // This is where you can add future fine-grained toggles
-        const soundToggles = {
-            ding1: true, ding2: true, ding3: true, special: true,
-            jungle: voiceovers.jungle,
-            raver_rune: voiceovers.raver_rune,
-            lotus: voiceovers.lotus,
-            exp_rune: voiceovers.exp_rune,
-        };
-
-        const createEvent = (baseName, dingName) => {
-            const event = [];
-            if (soundToggles[dingName]) event.push({ type: 'alert', payload: dingName });
-            if (soundToggles[baseName]) event.push({ type: 'voice', payload: baseName });
-            return event;
+            if (!timeline[time].includes(eventType)) {
+                timeline[time].push(eventType);
+            }
         };
 
         for (let min = 1; min * 60 < maxTime; min++) {
-            // Wisdom Rune (every 7 mins, starting at min 7) - HIGHEST PRIORITY
-            if (masterToggles.wisdom && min >= 7 && min % 7 === 0) {
-                const triggerTime = min * 60 - leadTimes[7];
-                addEvent(triggerTime, createEvent('exp_rune', 'special'));
-            }
-            // Lotus (every 3 mins, starting at min 3)
-            if (masterToggles.lotus && min >= 3 && min % 3 === 0) {
-                const triggerTime = min * 60 - leadTimes[3];
-                addEvent(triggerTime, createEvent('lotus', 'ding3'));
-            }
-            // Power Rune (every 2 mins, starting at min 2)
-            if (masterToggles.power && min >= 2 && min % 2 === 0) {
-                const triggerTime = min * 60 - leadTimes[2];
-                addEvent(triggerTime, createEvent('raver_rune', 'ding2'));
-            }
-            // Jungle (every 1 min)
-            if (masterToggles.jungle) {
-                const triggerTime = min * 60 - leadTimes[1];
-                addEvent(triggerTime, createEvent('jungle', 'ding1'));
-            }
+            const gameTime = min * 60;
+            // Use the single source of truth to generate timeline
+            if (min % 7 === 0 && min >= 7) addEvent(gameTime, 'wisdom');
+            if (min % 3 === 0 && min >= 3) addEvent(gameTime, 'lotus');
+            if (min % 2 === 0 && min >= 2) addEvent(gameTime, 'power');
+            if (min % 1 === 0) addEvent(gameTime, 'jungle');
         }
 
         // Add auto-stop command
-        addEvent(autoStop.time * 60, [{ type: 'command', payload: 'stop_timer' }]);
+        addEvent(autoStopSettings.time * 60, 'stop_timer');
 
         return timeline;
     };
@@ -276,32 +264,30 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // The "Planning Engine"
     const scheduleEvents = (totalSeconds) => {
-        const eventsAtThisSecond = timeline[totalSeconds];
-        if (!eventsAtThisSecond) return;
+        const leadTimes = getLeadTimes();
+        const eventsToQueue = [];
 
-        // Flatten the array of events and add to the queue
-        // e.g., [[{type:'alert', payload:'ding1'}, {type:'voice', payload:'jungle'}]]
-        const eventsToPlay = [];
-        const masterToggles = getMasterToggles(); // Get the CURRENT state of the master toggles
-
-        eventsAtThisSecond.forEach(event => {
-            if (Array.isArray(event)) {
-                // User's suggestion implemented here: Check master toggle before adding to queue
-                const voiceEvent = event.find(e => e.type === 'voice');
-                if (voiceEvent) {
-                    const eventKey = voiceEvent.payload.replace('_rune', ''); // 'exp_rune' -> 'exp', 'raver_rune' -> 'raver'
-                    const masterKey = eventKey === 'raver' ? 'power' : eventKey; // Map 'raver' to 'power' toggle
-                    if (masterToggles[masterKey]) {
-                        eventsToPlay.push(...event);
-                    }
-                }
-            } else if (event.type === 'command' && event.payload === 'stop_timer') {
-                handlePause(); // This is a command, not a sound, so it always executes
+        // Check for each type of event if it should be triggered NOW
+        // The loop now naturally follows the high-to-low priority defined in EVENT_CONFIG
+        for (const eventConfig of EVENT_CONFIG) {
+            const { key, leadTimeKey, ding, voice } = eventConfig;
+            const lead = leadTimes[leadTimeKey];
+            const futureTime = totalSeconds + lead;
+            
+            if (timeline[futureTime] && timeline[futureTime].includes(key)) {
+                // Event is scheduled to happen 'lead' seconds from now. Unpack and queue it.
+                eventsToQueue.push({ soundKey: ding, masterKey: key, isVoiceover: false });
+                eventsToQueue.push({ soundKey: voice, masterKey: key, isVoiceover: true });
             }
-        });
+        }
 
-        if (eventsToPlay.length > 0) {
-            addToQueue(eventsToPlay);
+        // Handle auto-stop command
+        if (timeline[totalSeconds] && timeline[totalSeconds].includes('stop_timer')) {
+            return handlePause();
+        }
+
+        if (eventsToQueue.length > 0) {
+            addToQueue(eventsToQueue);
         }
     };
 
