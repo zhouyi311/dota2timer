@@ -452,7 +452,15 @@ document.addEventListener('DOMContentLoaded', () => {
             updateRowState(); // Initial state
         });
 
-        [leadTime1Input, leadTime2Input, leadTime3Input, leadTime7Input].forEach(i => i.addEventListener('change', saveLeadTimes));
+        [leadTime1Input, leadTime2Input, leadTime3Input, leadTime7Input].forEach(input => input.addEventListener('change', (e) => {
+            let value = parseInt(e.target.value, 10);
+            if (isNaN(value) || value < 0) {
+                e.target.value = 0;
+            } else if (value > 60) {
+                e.target.value = 59;
+            }
+            saveLeadTimes();
+        }));
         [toggleJungle, toggleRaverRune, toggleLotus, toggleExpRune].forEach(t => t.addEventListener('change', saveVoiceoverSettings));
 
         const saveAutoStopSettings = () => {
@@ -466,7 +474,13 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         volumeSlider.addEventListener('change', saveVolume); // Save only when user releases slider
 
-        autoStopTimeEl.addEventListener('change', () => {
+        autoStopTimeEl.addEventListener('change', (e) => {
+            let value = parseInt(e.target.value, 10);
+            if (isNaN(value) || value < 1) {
+                e.target.value = 1; // Min value is 1
+            } else if (value > 999) {
+                e.target.value = 999;
+            }
             saveAutoStopSettings();
             // We still need to regenerate timeline if the MAX time changes
             if (!isRunning) {

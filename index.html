@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-bs-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -17,15 +17,15 @@
 
     <link rel="alternate" hreflang="en" href="https://ez2run.com/">
     <link rel="alternate" hreflang="zh" href="https://ez2run.com/zh/">
-    <header class="site-header">
-        <div class="container-fluid d-flex justify-content-between align-items-center">
+    <header class="navbar bg-body-tertiary border-bottom">
+        <div class="container-fluid">
             <div class="header-content">
-                <a href="https://ez2run.com/" class="brand">ez2run</a>
+                <a href="https://ez2run.com/" class="navbar-brand me-0">ez2run</a>
                 <span class="divider">/</span>
                 <span class="page-title">Dota2 Timer</span>
             </div>
             <div class="lang-selector-wrapper">
-                <select id="languageSelector"></select>
+                <select id="languageSelector" class="form-select form-select-sm"></select>
             </div>
         </div>
     </header>
@@ -87,73 +87,81 @@
                     <div class="announcement-settings-grid mt-3">
                         <!-- Jungle -->
                         <div class="row align-items-center py-3 border-bottom border-light border-opacity-10">
-                            <div class="event-name-group col-md-6 d-flex align-items-center">
-                                <input type="checkbox" id="enableJungle" data-event-master="jungle" class="me-3" checked>
-                                <label for="enableJungle" class="event-label" data-i18n-key="neutral-stack">🧌 Jungle Pull/Stack (1m)</label>
+                            <div class="col-md-5">
+                                <div class="form-check">
+                                    <input type="checkbox" id="enableJungle" data-event-master="jungle" class="form-check-input" checked>
+                                    <label for="enableJungle" class="event-label form-check-label" data-i18n-key="neutral-stack">🧌 Jungle Pull/Stack (1m)</label>
+                                </div>
                             </div>
-                            <div class="event-options-group col-md-6 d-flex align-items-center justify-content-md-end">
+                            <div class="col-md-7 d-flex align-items-center justify-content-md-end event-options-group">
                                 <div class="setting-input-wrapper">
                                     <span data-i18n-key="lead-time">Lead Time</span>
-                                    <input type="number" id="leadTime1" min="0" value="15">
+                                    <input type="number" id="leadTime1" class="form-control form-control-sm" min="0" max="99" maxlength="2" value="15">
                                     <span>s</span>
                                 </div>
-                                <div class="voiceover-wrapper">
-                                    <input type="checkbox" id="toggleJungle" checked>
-                                    <label for="toggleJungle" data-i18n-key="voiceover">Voiceover</label>
+                                <div class="form-check form-switch form-check-reverse">
+                                    <label class="form-check-label" for="toggleJungle" data-i18n-key="voiceover">Voiceover</label>
+                                    <input class="form-check-input" type="checkbox" role="switch" id="toggleJungle" checked>
                                 </div>
                             </div>
                         </div>
                         <!-- River Rune -->
                         <div class="row align-items-center py-3 border-bottom border-light border-opacity-10">
-                            <div class="event-name-group col-md-6 d-flex align-items-center">
-                                <input type="checkbox" id="enablePowerRune" data-event-master="power" class="me-3" checked>
-                                <label for="enablePowerRune" class="event-label" data-i18n-key="power-rune">🌟 Power Rune (2m)</label>
+                            <div class="col-md-5">
+                                <div class="form-check">
+                                    <input type="checkbox" id="enablePowerRune" data-event-master="power" class="form-check-input" checked>
+                                    <label for="enablePowerRune" class="event-label form-check-label" data-i18n-key="power-rune">🌟 Power Rune (2m)</label>
+                                </div>
                             </div>
-                            <div class="event-options-group col-md-6 d-flex align-items-center justify-content-md-end">
+                            <div class="col-md-7 d-flex align-items-center justify-content-md-end event-options-group">
                                 <div class="setting-input-wrapper">
                                     <span data-i18n-key="lead-time">Lead Time</span>
-                                    <input type="number" id="leadTime2" min="0" value="15">
+                                    <input type="number" id="leadTime2" class="form-control form-control-sm" min="0" max="99" maxlength="2" value="15">
                                     <span>s</span>
                                 </div>
-                                <div class="voiceover-wrapper">
-                                    <input type="checkbox" id="toggleRaverRune" checked>
-                                    <label for="toggleRaverRune" data-i18n-key="voiceover">Voiceover</label>
+                                <div class="form-check form-switch form-check-reverse">
+                                    <label class="form-check-label" for="toggleRaverRune" data-i18n-key="voiceover">Voiceover</label>
+                                    <input class="form-check-input" type="checkbox" role="switch" id="toggleRaverRune" checked>
                                 </div>
                             </div>
                         </div>
                         <!-- Lotus -->
                         <div class="row align-items-center py-3 border-bottom border-light border-opacity-10">
-                            <div class="event-name-group col-md-6 d-flex align-items-center">
-                                <input type="checkbox" id="enableLotus" data-event-master="lotus" class="me-3" checked>
-                                <label for="enableLotus" class="event-label" data-i18n-key="lotus">🪷 Lotus Bloom (3m)</label>
+                            <div class="col-md-5">
+                                <div class="form-check">
+                                    <input type="checkbox" id="enableLotus" data-event-master="lotus" class="form-check-input" checked>
+                                    <label for="enableLotus" class="event-label form-check-label" data-i18n-key="lotus">🪷 Lotus Bloom (3m)</label>
+                                </div>
                             </div>
-                            <div class="event-options-group col-md-6 d-flex align-items-center justify-content-md-end">
+                            <div class="col-md-7 d-flex align-items-center justify-content-md-end event-options-group">
                                 <div class="setting-input-wrapper">
                                     <span data-i18n-key="lead-time">Lead Time</span>
-                                    <input type="number" id="leadTime3" min="0" value="15">
+                                    <input type="number" id="leadTime3" class="form-control form-control-sm" min="0" max="99" maxlength="2" value="15">
                                     <span>s</span>
                                 </div>
-                                <div class="voiceover-wrapper">
-                                    <input type="checkbox" id="toggleLotus" checked>
-                                    <label for="toggleLotus" data-i18n-key="voiceover">Voiceover</label>
+                                <div class="form-check form-switch form-check-reverse">
+                                    <label class="form-check-label" for="toggleLotus" data-i18n-key="voiceover">Voiceover</label>
+                                    <input class="form-check-input" type="checkbox" role="switch" id="toggleLotus" checked>
                                 </div>
                             </div>
                         </div>
                         <!-- XP Rune -->
                         <div class="row align-items-center py-3">
-                            <div class="event-name-group col-md-6 d-flex align-items-center">
-                                <input type="checkbox" id="enableWisdomRune" data-event-master="wisdom" class="me-3" checked>
-                                <label for="enableWisdomRune" class="event-label" data-i18n-key="wisdom-rune">💜 Wisdom Rune (7m)</label>
+                            <div class="col-md-5">
+                                <div class="form-check">
+                                    <input type="checkbox" id="enableWisdomRune" data-event-master="wisdom" class="form-check-input" checked>
+                                    <label for="enableWisdomRune" class="event-label form-check-label" data-i18n-key="wisdom-rune">💜 Wisdom Rune (7m)</label>
+                                </div>
                             </div>
-                            <div class="event-options-group col-md-6 d-flex align-items-center justify-content-md-end">
+                            <div class="col-md-7 d-flex align-items-center justify-content-md-end event-options-group">
                                 <div class="setting-input-wrapper">
                                     <span data-i18n-key="lead-time">Lead Time</span>
-                                    <input type="number" id="leadTime7" min="0" value="25">
+                                    <input type="number" id="leadTime7" class="form-control form-control-sm" min="0" max="99" maxlength="2" value="25">
                                     <span>s</span>
                                 </div>
-                                <div class="voiceover-wrapper">
-                                    <input type="checkbox" id="toggleExpRune" checked>
-                                    <label for="toggleExpRune" data-i18n-key="voiceover">Voiceover</label>
+                                <div class="form-check form-switch form-check-reverse">
+                                    <label class="form-check-label" for="toggleExpRune" data-i18n-key="voiceover">Voiceover</label>
+                                    <input class="form-check-input" type="checkbox" role="switch" id="toggleExpRune" checked>
                                 </div>
                             </div>
                         </div>
@@ -164,7 +172,7 @@
                     <div class="setting-item col-md-12 d-flex align-items-center justify-content-between">
                         <h3 class="setting-label" data-i18n-key="auto-stop-timer">Timer Limit</h3>
                         <div class="setting-input-wrapper d-flex align-items-center">
-                            <input type="number" id="autoStopTime" min="1" value="120">
+                            <input type="number" id="autoStopTime" class="form-control form-control-sm" min="1" max="999" maxlength="3" value="120">
                             <span data-i18n-key="minutes-unit">min</span>
                         </div>
                     </div>
