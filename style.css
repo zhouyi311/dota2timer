@@ -107,14 +107,36 @@ Phase Toggle
 /* ---
 Timer Core
 --- */
-.timer-core { display: flex; flex-direction: column; align-items: center; gap: var(--space-2); } /* Reduced gap for tighter look */
+.timer-core { display: flex; flex-direction: column; align-items: center; gap: var(--space-4); margin: var(--space-2) 0; }
 #time-display-wrapper { width: 100%; display: flex; align-items: center; justify-content: center; gap: var(--space-4); }
-#editable-time-wrapper { display: flex; flex-direction: column; align-items: center; gap: 0; }
+#editable-time-wrapper { display: flex; flex-direction: column; align-items: center; gap: var(--space-2); }
 
-/* This new class is for the horizontal grouping of time inputs */
+/* This class is for the horizontal grouping of time inputs */
 .time-inputs-container { display: flex; align-items: center; }
 
-.time-input { font-family: var(--font-family-mono); font-size: var(--font-size-4xl); font-weight: 700; color: var(--color-text-base); background-color: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; width: 4ch; text-align: center; padding: var(--space-1) 0; appearance: textfield; -moz-appearance: textfield; transition: var(--transition-base); }
+.time-input-wrapper { position: relative; }
+
+/* Add a non-editable negative sign for the pre-game phase */
+.in-pre-game-phase .time-input-wrapper::before {
+    content: '-';
+    position: absolute;
+    left: var(--space-2);
+    top: 50%;
+    transform: translateY(-50%);
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-2xl);
+    font-weight: 700;
+    color: var(--color-danger);
+    pointer-events: none; /* Make sure it doesn't block clicks on the input */
+}
+
+.time-input { font-family: var(--font-family-mono); font-size: var(--font-size-4xl); font-weight: 700; color: var(--color-text-base); background-color: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; width: 4.5ch; text-align: center; padding: var(--space-1) 0; appearance: textfield; -moz-appearance: textfield; transition: var(--transition-base); }
+.in-pre-game-phase #currentMinutes,
+.in-pre-game-phase #currentSeconds {
+    /* Adjust padding to make space for the pseudo-element negative sign */
+    padding-left: var(--space-3);
+}
+
 .time-input:hover { background-color: rgba(0,0,0,0.3); border-color: rgba(255,255,255,0.2); }
 .time-input:focus { outline: none; background-color: rgba(0,0,0,0.4); border-color: var(--color-primary); }
 .time-input::-webkit-inner-spin-button, .time-input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
@@ -127,7 +149,7 @@ Timer Core
 .time-input.pre-game-paused { color: #fca5a5; } /* New class for paused pre-game */
 .time-input.pre-game-edit { color: #fca5a5; }
 
-.edit-hint { color: var(--color-text-muted-translucent); font-size: var(--font-size-xs); margin-top: calc(-1 * var(--space-1)); text-transform: uppercase; letter-spacing: 0.5px; text-align: center;}
+.edit-hint { color: var(--color-text-muted-translucent); font-size: var(--font-size-xs); text-transform: uppercase; letter-spacing: 0.5px; text-align: center; margin: 0; }
 
 /* ---
 Buttons
@@ -141,12 +163,10 @@ Buttons
 .pill-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
 .time-adjust-controls, .time-preset-controls { display: flex; flex-direction: column; gap: var(--space-1); }
+
 .time-adjust-btn { padding: 0.4rem 0.8rem; font-size: var(--font-size-sm); font-weight: 500; border-radius: var(--border-radius-pill); border: 1px solid var(--color-border); background-color: rgba(0,0,0,0.2); color: var(--color-text-muted); cursor: pointer; transition: var(--transition-base); }
 .time-adjust-btn:hover { background-color: rgba(255,255,255,0.1); border-color: var(--color-text-base); color: var(--color-text-base); }
 
-/* ---
-Settings Card (Systematized)
---- */
 .settings-card {
     background-color: var(--color-surface-light);
     padding: 0 var(--space-3); /* HORIZONTAL padding on the card */
@@ -178,7 +198,7 @@ Settings Card (Systematized)
     border: 1px solid var(--color-border); background-color: rgba(0,0,0,0.2); color: var(--color-text-muted);
     cursor: pointer; transition: var(--transition-base); min-width: 40px; text-align: center;
 }
-.preset-btn.active, .preset-btn:hover { background-color: var(--toggle-active-bg); color: var(--color-text-base); }
+.preset-btn:hover { background-color: var(--toggle-active-bg); color: var(--color-text-base); }
 
 /* ---
 Volume Row (inside Settings Card)
@@ -238,4 +258,14 @@ Responsive
     .time-input { font-size: 2.5rem; } /* Shrink time font on mobile */
     .container h1 { font-size: var(--font-size-xl); margin-top: var(--space-3); }
     #volume-control { width: 70%; }
+}
+
+@media (max-width: 575px) { /* Extra small devices */
+    #time-display-wrapper { flex-wrap: wrap; gap: var(--space-2); }
+    .time-inputs-container { order: 1; width: 100%; justify-content: center; }
+    .time-preset-controls, .time-adjust-controls {
+        order: 2;
+        flex-direction: row;
+        gap: var(--space-2);
+    }
 }

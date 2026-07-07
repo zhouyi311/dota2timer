@@ -33,28 +33,34 @@
     <div class="page-content container-fluid">
         <div class="container">
             <h1 data-i18n-key="main-title">Dota2 Event Timer</h1>
-            <div class="phase-toggle">
-                <button id="preGameBtn" class="phase-btn" data-i18n-key="pre-game-phase">Strategy Phase</button>
-                <button id="mainGameBtn" class="phase-btn active" data-i18n-key="main-game-phase">Game Phase</button>
-            </div>
 
             <main class="timer-core">
-                <div id="time-display-wrapper">
-                    <div class="time-preset-controls">
-                        <button id="setTimeZero" class="time-adjust-btn">0:00</button>
-                        <button id="setTimeNinety" class="time-adjust-btn">1:30</button>
-                    </div>
-                    <div class="time-inputs-container"> 
-                        <input type="tel" id="currentMinutes" class="time-input" min="0" max="999" maxlength="3" value="00">
-                        <span class="time-separator">:</span>
-                        <input type="tel" id="currentSeconds" class="time-input" min="0" max="59" maxlength="2" value="00">
-                    </div>
-                    <div class="time-adjust-controls">
-                        <button id="adjustTimePlus" class="time-adjust-btn">+1s</button>
-                        <button id="adjustTimeMinus" class="time-adjust-btn">-1s</button>
-                    </div>
+                <div class="phase-toggle">
+                    <button id="preGameBtn" class="phase-btn" data-i18n-key="pre-game-phase">Strategy Phase</button>
+                    <button id="mainGameBtn" class="phase-btn active" data-i18n-key="main-game-phase">Game Phase</button>
                 </div>
-                <p class="edit-hint" data-i18n-key="edit-hint">Click on the time to edit.</p>
+                <div id="editable-time-wrapper">
+                    <div id="time-display-wrapper">
+                        <div class="time-preset-controls">
+                            <button id="setTimeZero" class="time-adjust-btn">0:00</button>
+                            <button id="setTimeNinety" class="time-adjust-btn">1:30</button>
+                        </div>
+                        <div class="time-inputs-container"> 
+                            <div class="time-input-wrapper">
+                                <input type="tel" id="currentMinutes" class="time-input" min="0" max="999" maxlength="3" value="00">
+                            </div>
+                            <span class="time-separator">:</span>
+                            <div class="time-input-wrapper">
+                                <input type="tel" id="currentSeconds" class="time-input" min="0" max="59" maxlength="2" value="00">
+                            </div>
+                        </div>
+                        <div class="time-adjust-controls">
+                            <button id="adjustTimePlus" class="time-adjust-btn">+1s</button>
+                            <button id="adjustTimeMinus" class="time-adjust-btn">-1s</button>
+                        </div>
+                    </div>
+                    <p class="edit-hint" data-i18n-key="edit-hint">Click on the time to edit.</p>
+                </div>
                 <div class="timer-controls">
                     <button id="pauseBtn" class="pill-btn" data-i18n-key="pause">Pause</button>
                     <button id="startBtn" class="pill-btn" data-i18n-key="start">Start</button>

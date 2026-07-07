@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     // DOM Elements
+    const timerCore = document.querySelector('.timer-core');
     const preGameBtn = document.getElementById('preGameBtn');
     const mainGameBtn = document.getElementById('mainGameBtn');
     const currentMinutesInput = document.getElementById('currentMinutes');
@@ -279,13 +280,23 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!eventsAtThisSecond) return;
 
         // Flatten the array of events and add to the queue
-        // e.g., [[ding1, jungle], [ding2, raver_rune]] -> [ding1, jungle, ding2, raver_rune]
+        // e.g., [[{type:'alert', payload:'ding1'}, {type:'voice', payload:'jungle'}]]
         const eventsToPlay = [];
+        const masterToggles = getMasterToggles(); // Get the CURRENT state of the master toggles
+
         eventsAtThisSecond.forEach(event => {
             if (Array.isArray(event)) {
-                eventsToPlay.push(...event);
+                // User's suggestion implemented here: Check master toggle before adding to queue
+                const voiceEvent = event.find(e => e.type === 'voice');
+                if (voiceEvent) {
+                    const eventKey = voiceEvent.payload.replace('_rune', ''); // 'exp_rune' -> 'exp', 'raver_rune' -> 'raver'
+                    const masterKey = eventKey === 'raver' ? 'power' : eventKey; // Map 'raver' to 'power' toggle
+                    if (masterToggles[masterKey]) {
+                        eventsToPlay.push(...event);
+                    }
+                }
             } else if (event.type === 'command' && event.payload === 'stop_timer') {
-                handlePause();
+                handlePause(); // This is a command, not a sound, so it always executes
             }
         });
 
@@ -329,6 +340,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const switchPhase = (newPhase, notifyWorker = true) => {
         currentPhase = newPhase;
+        timerCore.classList.toggle('in-pre-game-phase', newPhase === 'pre-game');
         
         if (currentPhase === 'pre-game') {
             preGameBtn.classList.add('active');
@@ -454,23 +466,6 @@ document.addEventListener('DOMContentLoaded', () => {
             updateRowState(); // Initial state
         });
 
-        // Preset button logic
-        const presetButtons = document.querySelectorAll('.preset-btn');
-        presetButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                const role = button.dataset.role;
-                enableJungle.checked = (role === '45' || role === 'all');
-                enablePowerRune.checked = (role === '2' || role === 'all');
-                enableLotus.checked = (role === '1' || role === '3' || role === '45' || role === 'all');
-                enableWisdomRune.checked = (role === '1' || role === '3' || role === '45' || role === 'all');
-                
-                // Update UI and save settings
-                Object.values(masterToggleMap).forEach(({ master }) => master.dispatchEvent(new Event('change')));
-                presetButtons.forEach(btn => btn.classList.remove('active'));
-                button.classList.add('active');
-            });
-        });
-
         [leadTime1Input, leadTime2Input, leadTime3Input, leadTime7Input].forEach(i => i.addEventListener('change', saveLeadTimes));
         [toggleJungle, toggleRaverRune, toggleLotus, toggleExpRune].forEach(t => t.addEventListener('change', saveVoiceoverSettings));
 
@@ -485,7 +480,13 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         volumeSlider.addEventListener('change', saveVolume); // Save only when user releases slider
 
-        autoStopTimeEl.addEventListener('change', saveAutoStopSettings);
+        autoStopTimeEl.addEventListener('change', () => {
+            saveAutoStopSettings();
+            // We still need to regenerate timeline if the MAX time changes
+            if (!isRunning) {
+                timeline = generateTimeline();
+            }
+        });
 
         adjustTimePlusBtn.addEventListener('click', () => worker.postMessage({ command: 'adjust_time', data: { seconds: 1 } }));
         adjustTimeMinusBtn.addEventListener('click', () => worker.postMessage({ command: 'adjust_time', data: { seconds: -1 } }));
@@ -517,6 +518,25 @@ document.addEventListener('DOMContentLoaded', () => {
         document.addEventListener('languageChange', (e) => {
             loadAudioForLanguage(e.detail.lang);
         });
+
+        // Preset button logic
+        const presetButtons = document.querySelectorAll('.preset-btn');
+        presetButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const role = button.dataset.role;
+                setPreset(role);
+            });
+        });
+
+        const setPreset = (role) => {
+            enableJungle.checked = (role === '45' || role === 'all');
+            enablePowerRune.checked = (role === '2' || role === 'all');
+            enableLotus.checked = (role === '1' || role === '3' || role === '45' || role === 'all');
+            enableWisdomRune.checked = (role === '1' || role === '3' || role === '45' || role === 'all');
+            
+            // Manually trigger the change event for each master toggle to update UI and save settings
+            Object.values(masterToggleMap).forEach(({ master }) => master.dispatchEvent(new Event('change')));
+        };
         });
     };
 
