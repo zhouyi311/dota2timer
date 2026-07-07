@@ -351,9 +351,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 let minutes = parseInt(currentMinutesInput.value, 10) || 0;
                 let seconds = parseInt(currentSecondsInput.value, 10) || 0;
                 const totalSec = minutes * 60 + seconds;
-                if (totalSec > 90 || totalSec <= 0) {
+                if (totalSec > 80 || totalSec <= 0) {
                     currentMinutesInput.value = "01";
-                    currentSecondsInput.value = "30";
+                    currentSecondsInput.value = "20";
                 }
             }
         } else { // 'main-game'
@@ -499,7 +499,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         setTimeNinetyBtn.addEventListener('click', () => {
             currentMinutesInput.value = "01";
-            currentSecondsInput.value = "30";
+            currentSecondsInput.value = "20";
             updateTimeFromInputs();
         });
 

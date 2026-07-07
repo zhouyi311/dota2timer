@@ -259,6 +259,21 @@ Responsive
     .container h1 { font-size: var(--font-size-xl); margin-top: var(--space-3); }
     #volume-control { width: 70%; }
 }
+/* --- Mobile Styling Enhancements for Event Settings --- */
+@media (max-width: 767.98px) {
+    /* 
+     * 1. Adds vertical spacing (gap) between the event name row 
+     *    and the options row when they stack on mobile.
+     */
+    .event-options-group {
+        margin-top: 0.75rem;
+        /* 
+         * 2. Stretches the items inside to be evenly distributed.
+         */
+        width: 100%;
+        justify-content: space-between !important; /* Override Bootstrap's default alignment */
+    }
+}
 
 @media (max-width: 575px) { /* Extra small devices */
     #time-display-wrapper { flex-wrap: wrap; gap: var(--space-2); }
