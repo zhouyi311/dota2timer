@@ -36,7 +36,7 @@ const getLanguage = () => currentLang;
 
 const initLocalization = async () => {
     try {
-        const response = await fetch('locales.json');
+        const response = await fetch('assets/locales/locales.json');
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }

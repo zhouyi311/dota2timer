@@ -194,14 +194,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Only apply localization logic to specified voice-over files
             if (localizableAudioKeys.includes(key) && !isEnglish) {
-                const defaultPath = `audio/${fileName}`;
-                const langPathFull = `audio/${langPath}${fileName}`;
+                const defaultPath = `assets/audio/${fileName}`;
+                const langPathFull = `assets/audio/${langPath}${fileName}`;
                 audio = new Audio(langPathFull);
                 // Set up a fallback to the English audio on error (e.g., 404 Not Found)
                 audio.onerror = () => { audio.src = defaultPath; };
             } else {
                 // For universal sounds (dings) or English, load directly
-                audio = new Audio(`audio/${fileName}`);
+                audio = new Audio(`assets/audio/${fileName}`);
             }
             audioObjects[key] = audio;
         }
@@ -245,7 +245,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const initializeWorker = () => {
         if (worker) return;
         try {
-            worker = new Worker('worker.js');
+            worker = new Worker('assets/js/worker.js');
             worker.onmessage = (e) => {
                 const { type, totalSeconds, newPhase } = e.data;
                 if (type === 'time') {

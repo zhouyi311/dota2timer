@@ -1,0 +1,7 @@
+{
+    "name": "app-dota2timer",
+    "compatibility_date": "2026-07-08",
+    "assets": {
+        "directory": "."
+    }
+}
