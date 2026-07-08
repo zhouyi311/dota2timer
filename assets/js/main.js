@@ -35,6 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Audio Elements
     let audioObjects = {};
     const audioFileNames = {
+        ding0: 'ding0.mp3',
         ding1: 'ding1.mp3',
         ding2: 'ding2.mp3',
         ding3: 'ding3.mp3',
@@ -230,7 +231,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (min % 7 === 0 && min >= 7) addEvent(gameTime, 'wisdom');
             if (min % 3 === 0 && min >= 3) addEvent(gameTime, 'lotus');
             if (min % 2 === 0 && min >= 2) addEvent(gameTime, 'power');
-            if (min % 1 === 0) addEvent(gameTime, 'jungle');
+            if (min % 1 === 0 && min >= 2) addEvent(gameTime, 'jungle');
         }
 
         // Add auto-stop command
@@ -247,12 +248,15 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             worker = new Worker('assets/js/worker.js');
             worker.onmessage = (e) => {
-                const { type, totalSeconds, newPhase } = e.data;
+                const { type, totalSeconds, newPhase, soundKey } = e.data;
                 if (type === 'time') {
                     updateDisplayTime(totalSeconds);
                     scheduleEvents(totalSeconds); // The "Planning Engine" hook
                 } else if (type === 'phase_change' && newPhase) {
                     switchPhase(newPhase, false);
+                } else if (type === 'play_sound' && soundKey) {
+                    const audio = audioObjects[soundKey];
+                    if (audio && audioUnlocked) audio.play().catch(e => console.warn(`Could not play sound ${soundKey}`, e));
                 }
             };
             worker.onerror = (err) => { console.error('Worker error:', err); worker = null; updateUIState(false); };
@@ -283,7 +287,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Handle auto-stop command
         if (timeline[totalSeconds] && timeline[totalSeconds].includes('stop_timer')) {
-            return handlePause();
+            handlePause();
         }
 
         if (eventsToQueue.length > 0) {
@@ -355,10 +359,6 @@ document.addEventListener('DOMContentLoaded', () => {
             updateTimeFromInputs();
         } else { // If the switch is automatic (from worker), just update the UI state.
             updateUIState(isRunning);
-        }
-
-        if (worker && notifyWorker) {
-            worker.postMessage({ command: 'set_phase', data: { phase: currentPhase } });
         }
     };
 
@@ -508,10 +508,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         if (worker) {
             // Wait a moment for worker to be ready before setting phase
-            setTimeout(() => {
-                worker.postMessage({ command: 'set_phase', data: { phase: 'main-game' } });
-                updateTimeFromInputs(); // Ensure time is set to 0
-            }, 100);
+            setTimeout(() => updateTimeFromInputs(), 100);
         }
 
         // Listen for language changes to reload audio files
